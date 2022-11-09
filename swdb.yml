@@ -1,0 +1,8 @@
+---
+- name: Database Server Installation
+  hosts: "{{ hostgroup | default('all') }}"
+  become: true
+  any_errors_fatal: true
+  roles:
+    - oraswdb_install
+    - oraswdb_manage_patches
