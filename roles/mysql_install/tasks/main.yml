@@ -1,0 +1,21 @@
+---
+- name: create user and config file
+  ansible.builtin.import_tasks: create_user_and_config_file.yaml
+
+- name: install mysql dependents 
+  ansible.builtin.import_tasks: install_mysql_dependents.yaml
+
+- name: install mysql to /usr/local/mysql
+  ansible.builtin.import_tasks: install_mysql.yaml
+
+- name: init mysql datadir
+  ansible.builtin.import_tasks: initialize_mysql_datadir.yaml
+
+- name: config mysql service and start mysql
+  ansible.builtin.import_tasks: config_mysql_service_and_start_mysql.yaml
+
+- name: sleep 15's
+  ansible.builtin.shell: sleep 15
+
+- name: make mysql secure
+  ansible.builtin.import_tasks: make_mysql_security.yaml

@@ -1,0 +1,15 @@
+---
+ - name: install libaio-devel
+   ansible.builtin.yum:
+    name: libaio-devel
+    state: present
+
+ - name: install numactl-devel
+   ansible.builtin.yum:
+    name: numactl-devel
+    state: present
+
+ - name: install perl-Data-Dumper 
+   ansible.builtin.yum:
+    name: perl-Data-Dumper 
+    state: present
