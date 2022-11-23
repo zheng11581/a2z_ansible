@@ -1,5 +1,0 @@
----
-- name: Import Playbook uninstall-mysql
-  import_playbook: uninstall-mysql.yml
-- name: Import Playbook install-mysql
-  import_playbook: install-mysql.yml
