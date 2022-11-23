@@ -1,6 +1,6 @@
 ---
 - name: Host configuration
-  hosts: "{{ hostgroup | default('all') }}"
+  hosts: "{{ hostgroup | default('oracle') }}"
   become: true
   any_errors_fatal: true
   roles:

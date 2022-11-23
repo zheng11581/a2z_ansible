@@ -1,6 +1,6 @@
 ---
 - name: Database Server Database Creation
-  hosts: "{{ hostgroup | default('all') }}"
+  hosts: "{{ hostgroup | default('oracle') }}"
   become: true
   any_errors_fatal: true
   roles:
