@@ -94,3 +94,17 @@
     state: link
     owner: mysql
     group: mysql
+
+- name: link for libncurses.so.5 in rhel-8.x
+  when: ansible_distribution_major_version == "8"
+  ansible.builtin.file:
+    src: "/lib64/libncurses.so.6.1"
+    dest: "/lib64/libncurses.so.5"
+    state: link
+
+- name: link for libtinfo.so.5 in rhel-8.x
+  when: ansible_distribution_major_version == "8"
+  ansible.builtin.file:
+    src: "/lib64/libtinfo.so.6.1"
+    dest: "/lib64/libtinfo.so.5"
+    state: link

@@ -3,32 +3,32 @@
    remote_user: root
    become_user: root
    vars_files:
-    - ../../../config.yaml
-    - vars/multi_source_replication.yaml
+    - ../../../config.yml
+    - vars/multi_source_replication.yml
    tasks:
     - name: create user and config file
-      ansible.builtin.import_tasks: common/create_user_and_config_file.yaml
+      ansible.builtin.import_tasks: common/create_user_and_config_file.yml
 
     - name: install mysql dependents 
-      ansible.builtin.import_tasks: common/install_mysql_dependents.yaml
+      ansible.builtin.import_tasks: common/install_mysql_dependents.yml
 
     - name: install mysql to /usr/local/mysql
-      ansible.builtin.import_tasks: common/install_mysql.yaml
+      ansible.builtin.import_tasks: common/install_mysql.yml
 
     - name: init mysql datadir
-      ansible.builtin.import_tasks: common/initialize_mysql_datadir.yaml
+      ansible.builtin.import_tasks: common/initialize_mysql_datadir.yml
 
     - name: config mysql service and start mysql
-      ansible.builtin.import_tasks: common/config_mysql_service_and_start_mysql.yaml
+      ansible.builtin.import_tasks: common/config_mysql_service_and_start_mysql.yml
 
     - name: make mysql secure
-      ansible.builtin.import_tasks: common/make_mysql_security.yaml
+      ansible.builtin.import_tasks: common/make_mysql_security.yml
 
     - name: sleep 15 seconds
-      ansible.builtin.import_tasks: ./common/sleep_15.yaml
+      ansible.builtin.import_tasks: ./common/sleep_15.yml
 
     - name: config multi source replication
-      ansible.builtin.import_tasks: common/config_multi_source_replication.yaml
+      ansible.builtin.import_tasks: common/config_multi_source_replication.yml
 
 
 ...

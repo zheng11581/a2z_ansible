@@ -5,7 +5,7 @@
    vars:
     backup_suffix: '20180618'
    vars_files:
-    - ../../../config.yaml
+    - ../../../config.yml
    tasks:
 
     - name: stop mysql service 
