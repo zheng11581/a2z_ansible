@@ -1,0 +1,10 @@
+---
+ - name: Install Apisix
+   hosts: "{{ hostgroup | default('apisix') }}"
+   become: true
+   any_errors_fatal: true
+   remote_user: root
+   become_user: root
+   roles:
+    - apisix_install
+

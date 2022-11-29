@@ -1,0 +1,69 @@
+---
+- name: Install Etcd - Copy Etcd package
+  ansible.builtin.copy:
+    src: "{{ packages_dir }}/{{ etcd_package }}.tar.gz"
+    dest: /root/{{ etcd_package }}.tar.gz
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+
+- name: Install Etcd - Copy Etcd install shell
+  ansible.builtin.template:
+    src: install_etcd.sh
+    dest: /root/install_etcd.sh
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+
+- name: Install Etcd - Execute shell
+  ansible.builtin.command: /root/install_etcd.sh
+
+- name: Install Apisix - Add Apache Apisix Repo
+  ansible.builtin.yum:
+    name: "{{ apisix_rpm }}"
+    state: present
+    disable_gpg_check: true
+
+- name: Install Apisix - Install Apache Apisix 
+  ansible.builtin.yum:
+    name: apisix
+    state: installed
+
+- name: Install Apisix - Apisix Init
+  ansible.builtin.command: apisix init
+
+- name: Install Apisix - Apisix Start
+  ansible.builtin.command: apisix start
+
+- name: Install Dashboard - Copy Dashboard package
+  ansible.builtin.copy:
+    src: "{{ packages_dir }}/{{ apisix_dashboard_rpm }}"
+    dest: /root/{{ apisix_dashboard_rpm }}
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+
+- name: Install Dashboard - Install Apache Apisix Dashboard
+  ansible.builtin.yum:
+    name: /root/{{ apisix_dashboard_rpm }}
+    state: present
+    disable_gpg_check: true
+
+- name: Install Dashboard - Copy Dashboard conf.yaml
+  ansible.builtin.template:
+    src: conf.yaml
+    dest: /usr/local/apisix/dashboard/conf/conf.yaml
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+
+- name: Install Dashboard - Launch Apache Apisix Dashboard
+  ansible.builtin.service: 
+    name: apisix-dashboard
+    state: started
+  register: result
+
+- name: Visit website http://{{ ansible_default_ipv4["address"] }}:9000
+  ansible.builtin.debug: 
+    msg: "Default user/password: admin/admin"
+

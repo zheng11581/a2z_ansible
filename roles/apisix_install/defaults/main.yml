@@ -1,0 +1,10 @@
+---
+apisix_rpm: https://repos.apiseven.com/packages/centos/apache-apisix-repo-1.0-1.noarch.rpm
+apisix_dashboard_rpm: 
+  "{% if ansible_distribution_major_version | int == 7 %}apisix-dashboard-2.13.1-0.el7.x86_64.rpm\
+   {% elif ansible_distribution_major_version | int == 8 %}apisix-dashboard-2.13.1-0.el8.x86_64.rpm\
+   {% else %}None\
+   {% endif %}"
+
+packages_dir: /root/softwares/apisix
+etcd_package: etcd-v3.5.4-linux-amd64
