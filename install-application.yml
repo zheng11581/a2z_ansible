@@ -1,5 +1,5 @@
 ---
- - name: Install Application
+ - name: Install Application - nginx redis nacos
    hosts: "{{ hostgroup | default('apisix') }}"
    become: true
    any_errors_fatal: true
@@ -7,5 +7,17 @@
    become_user: root
    roles:
     #- nginx_install
-    - redis_install
+    #- redis_install
+    - nacos_install
 
+#  - name: Install Application - application
+#    hosts: "{{ hostgroup | default('apisix') }}"
+#    become: true
+#    any_errors_fatal: true
+#    remote_user: root
+#    become_user: root
+#    vars:
+#     springboot_application_name: spring-boot-sample
+#     springboot_src: /root/softwares/springboot/spring-boot-sample.jar
+#    roles:
+#     - springboot_install

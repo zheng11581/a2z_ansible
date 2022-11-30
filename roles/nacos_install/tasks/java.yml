@@ -1,0 +1,26 @@
+---
+- name: Inatall Java - Ensure Java is installed
+  yum:
+    name: "{{ java_package }}"
+    state: "present"
+    update_cache: yes
+  when: ansible_os_family == 'RedHat' or ansible_os_family == 'Anolis' or ansible_os_family == 'OracleLinux' and not java_from_local
+
+- name: Inatall Java - Ensure Java is installed(Debian)
+  apt: name={{ java_package }} state="present"
+  when: ansible_os_family == 'Debian' and not java_from_local
+
+- name: Check java version
+  command: java -version 2>&1 | grep OpenJDK
+  register: open_jdk
+  changed_when: false
+  environment:
+    JAVA_HOME: /usr/lib/jvm/jre-openjdk
+
+  
+
+# https://github.com/docker-library/openjdk/issues/19 - ensures tests pass due to java 8 broken certs
+- name: refresh the java ca-certificates
+  command: /var/lib/dpkg/info/ca-certificates-java.postinst configure
+  when: ansible_distribution == 'Ubuntu' and open_jdk.rc == 0
+  changed_when: false
