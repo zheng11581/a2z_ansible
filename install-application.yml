@@ -6,8 +6,8 @@
    remote_user: root
    become_user: root
    roles:
-    #- nginx_install
-    #- redis_install
+    - nginx_install
+    - redis_install
     - nacos_install
 
 #  - name: Install Application - application

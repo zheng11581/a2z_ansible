@@ -3,6 +3,14 @@
   ansible.builtin.include: java.yml
   when: java_install
 
+- name: Inatall Nacos - Install unzip
+  yum:
+    name: unzip
+    state: "present"
+    update_cache: yes
+  when: ansible_os_family == 'RedHat' or ansible_os_family == 'Anolis OS' or ansible_os_family == 'OracleLinux'
+
+
 - name: Install Nacos - unzip Nacos zip
   ansible.builtin.unarchive:
     src: "{{packages_dir}}/{{nacos_package}}"

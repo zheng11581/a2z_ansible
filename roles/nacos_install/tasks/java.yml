@@ -1,11 +1,17 @@
 ---
+- name: Debug 
+  ansible.builtin.debug:
+    msg: "{{ ansible_os_family }}"
+
 - name: Inatall Java - Ensure Java is installed
   yum:
     name: "{{ java_package }}"
     state: "present"
     update_cache: yes
-  when: ansible_os_family == 'RedHat' or ansible_os_family == 'Anolis' or ansible_os_family == 'OracleLinux' and not java_from_local
-
+  when: (ansible_os_family == 'RedHat' or ansible_os_family == 'Anolis OS' or ansible_os_family == 'OracleLinux') and not java_from_local
+  environment:
+    JAVA_HOME: /usr/lib/jvm/jre-openjdk
+    
 - name: Inatall Java - Ensure Java is installed(Debian)
   apt: name={{ java_package }} state="present"
   when: ansible_os_family == 'Debian' and not java_from_local
