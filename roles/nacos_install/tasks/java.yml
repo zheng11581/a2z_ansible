@@ -8,7 +8,7 @@
     name: "{{ java_package }}"
     state: "present"
     update_cache: yes
-  when: (ansible_os_family == 'RedHat' or ansible_os_family == 'Anolis OS' or ansible_os_family == 'OracleLinux') and not java_from_local
+  when: (ansible_os_family == 'RedHat' or ansible_os_family == 'Anolis OS' or ansible_os_family == 'Anolis') and not java_from_local
   environment:
     JAVA_HOME: /usr/lib/jvm/jre-openjdk
     
