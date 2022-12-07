@@ -1,42 +1,56 @@
 server{
-    listen 80;
-    listen 443 ssl;
+    listen 80; 
+    #listen 443 ssl;
     server_name {{domain_name}};
-    root {{nginx_www}};
+	client_max_body_size 10M;
+
+    root {{nginx_home}}/html;
     index index.html index.htm index.jsp;
-    ssl on;
-    ssl_certificate   {{nginx_home}}/conf.d/{{ssl_cert}};
-    ssl_certificate_key  {{nginx_home}}/conf.d/{{ssl_key}};
-    ssl_session_timeout 5m;
-    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
-    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-    ssl_prefer_server_ciphers on;
-    error_page  404 403 500 502 503 504  /404.html;
-    client_max_body_size 10M;
-    location = /doctor/getCode {
-        if ( $request_method = GET ){
-            return 404;
+
+	#ssl on;
+	#ssl_certificate   ../conf.d/cert/6919700_follow-up-test.bjbryy.cn.pem;
+	#ssl_certificate_key  ../conf.d/cert/6919700_follow-up-test.bjbryy.cn.key;
+    #ssl_session_timeout 5m;
+	#ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
+    #ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+	#ssl_prefer_server_ciphers on;
+        
+	error_page   503  /503.html;
+        location = /503.html {
+            default_type text/html;
+            return 503 'no';
         }
-        proxy_pass http://localhost:8185;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-Port $server_port;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_read_timeout 120s;
-        proxy_send_timeout 120s;
-        proxy_connect_timeout 120s;
+
+	error_page 413 /respon_413.json;
+	location = /respon_413.json {
+	    default_type application/json;
+	    return 413 '{"success":false,"message":"文件大小超过10MB,无法上传","code":"E20001","data":null}';
+	}
+
+	error_page  404 403 500 502 504  /404.html;
+	
+	location = /404.html {
+	    root {{nginx_home}}/html;
+	}
+
+	location /jump.html {
+		rewrite {{nginx_home}}/jump.html last;
+	}
+
+	location /jumpUrl.html {
+        rewrite {{nginx_home}}/html/jumpUrl.html last;
     }
-    location /recordfile {
-        proxy_pass http://43.254.25.186;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-Port $server_port;
-        add_header Access-Control-Allow-Origin *;
-        add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept";
-        add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
+
+	location = /doctor/Jv39Bb6yHE.txt {
+	    root {{nginx_home}}/html;
     }
-    location / {
+
+	location = /user/Jv39Bb6yHE.txt {
+        root {{nginx_home}}/html;
+    }
+
+
+	location / {
         proxy_pass http://localhost:8888;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -47,18 +61,8 @@ server{
         proxy_send_timeout 120s;
         proxy_connect_timeout 120s;
     }
-    location /doctor {
-        proxy_pass http://localhost:8185;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-Port $server_port;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_read_timeout 120s;
-        proxy_send_timeout 120s;
-        proxy_connect_timeout 120s;
-    }
-    location /JobAdmin {
+
+	location /JobAdmin {
         proxy_pass http://localhost:8190;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -69,18 +73,8 @@ server{
         proxy_send_timeout 120s;
         proxy_connect_timeout 120s;
     }
-    location /websocket5 {
-        proxy_pass http://localhost:8184/chat/websocket5;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-Port $server_port;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_read_timeout 120s;
-        proxy_send_timeout 120s;
-        proxy_connect_timeout 120s;
-    }
-    location /websocket {
+
+	location /websocket {
         proxy_pass http://localhost:8184/chat/websocket;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -91,72 +85,225 @@ server{
         proxy_send_timeout 120s;
         proxy_connect_timeout 120s;
     }
+
+    location /websocket2 {
+        proxy_pass http://localhost:8184/chat/websocket2;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+        proxy_connect_timeout 120s;
+    }
+
     location /websocket4 {
-    	proxy_pass http://localhost:8184/chat/websocket4;
-    	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    	proxy_set_header X-Forwarded-Proto $scheme;
-   		proxy_set_header X-Forwarded-Port $server_port;
-    	proxy_set_header Upgrade $http_upgrade;
-    	proxy_set_header Connection "upgrade";
-    	proxy_read_timeout 120s;
-    	proxy_send_timeout 120s;
-    	proxy_connect_timeout 120s;
+        proxy_pass http://localhost:8184/chat/websocket4;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+        proxy_connect_timeout 120s;
     }
-    location /file/mdt {
-        expires 30d;
-        root /glzt/dataFile/images;
-        add_header    Cache-Control  max-age=86400;
-        add_header Access-Control-Allow-Origin *;
-        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
-        add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,lang,access-token';
+
+	location /websocket5 {
+        proxy_pass http://localhost:8184/chat/websocket5;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+        proxy_connect_timeout 120s;
     }
-    location /vwlabrf/getVwLabRf {
-        proxy_pass http://43.254.25.189:8081;
+
+	location /eurekaServer {
+        proxy_pass http://localhost:8187;
+
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP   $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Port $server_port;
         proxy_redirect off;
-        client_max_body_size 20M;
     }
-    location /followup {
+	
+	location /followup {
         try_files $uri $uri/ /followup/index.html;
     }
-    location ~* \.(gif|jpg|jpeg|ico|txt|png|webp|svg)$ {
+
+	location ~* \.(gif|jpg|jpeg|ico|txt|png|webp|svg)$ {
 	    expires 30d;
-        root /glzt/dataFile/images;
-	add_header    Cache-Control  max-age=86400;
+        root /glzt/PatientService/images;
+		add_header    Cache-Control  max-age=86400;
+        add_header Access-Control-Allow-Origin *;
+    	add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+    	add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,lang,ac
+cess-token';
+    }
+
+	location ~* \.(mp3)$ {
+        expires 30d;
+        root /home/PatientService/audio;
+        add_header    Cache-Control  max-age=86400;
+    }
+	
+	#电子发票文件
+	location /file/invoice {
+		expires 30d;
+        root /home/PatientService/images;
+		add_header    Cache-Control  max-age=86400;
       	add_header Access-Control-Allow-Origin *;
     	add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
     	add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,lang,access-token';
     }
-    location /file/invoice { 
+	
+	#疾病摘要文件
+	location /file/mdt {
         expires 30d;
-        root /glzt/dataFile/images;
-        add_header    Cache-Control  max-age=86400;
+        root /home/PatientService/images;
+        add_header    Cache-Control  max-age=86400;         
         add_header Access-Control-Allow-Origin *;
         add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
         add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,lang,access-token';
     }
-    location ~* \.(mp3)$ {
-    	expires 30d;
-    	root /glzt/dataFile/audio;
-    	add_header    Cache-Control  max-age=86400;
+
+	location /patient {
+        proxy_pass {{api_proxy}};
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP   $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+        #proxy_redirect off;
+        proxy_redirect http:// $scheme://;
     }
-    location /jump.html {
-        rewrite /var/www/html/jump.html last;
+
+	#音视频录制文件代理
+	location /recordfile {
+		proxy_pass {{api_proxy}};
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header X-Forwarded-Port $server_port;
+		add_header Access-Control-Allow-Origin *;
+		add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept";
+		add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
+	}
+
+	#埋点系统
+	location /dataGather {
+        proxy_pass {{api_proxy}};
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP   $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+        #proxy_redirect off;
+        proxy_redirect http:// $scheme://;
     }
-    location /jumpUrl.html {
-        rewrite /var/www/html/jumpUrl.html last;
+
+    # 访问请求转发到网关
+    location @routerback { 
+        proxy_pass http://localhost:8888;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+        proxy_connect_timeout 120s;          
     }
-    location /dataGather {
-    	proxy_pass http://43.254.25.186:8081;
-    	proxy_set_header Host $host;
-    	proxy_set_header X-Real-IP   $remote_addr;
-    	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    	proxy_set_header X-Forwarded-Proto $scheme;
-    	proxy_set_header X-Forwarded-Port $server_port;
-    	proxy_redirect http:// $scheme://;
+
+    #运营后台
+    location /community {
+        alias /opt/nginx/html/community;
+        index index.html;
+        try_files $uri $uri/ @routerback;
     }
+
+    #WEB端
+    location /web {
+        alias /opt/nginx/html/web;
+        index index.html;
+        #try_files $uri $uri/ @routerback;
+        try_files $uri $uri/ /web/index.html;
+    }
+
+    location /upm {
+        proxy_pass   http://127.0.0.1:16060/upm;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP   $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_redirect off;
+    }
+
+    location /wgcloud {
+        proxy_pass   http://127.0.0.1:9989/wgcloud;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP   $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+	    proxy_redirect http:// $scheme://;
+    }  
+
+    location /platform/ {
+        proxy_pass   http://127.0.0.1:6001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP   $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_redirect off;
+    } 
+
+    #admin监控
+    location /springbootadmin {
+        proxy_pass http://127.0.0.1:8199/springbootadmin;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP   $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_redirect off; 
+    }
+
+	# Nacos
+    location /nacos {
+        proxy_pass http://127.0.0.1:8848;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP   $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_redirect off; 
+    }
+
+    location ~* .(gif|jpg|jpeg|ico|txt|png)$ {
+        #alias /community/images/;
+        #root /home/CommunityService/files/;
+        root /home/PatientService/images;
+        add_header Cache-Control max-age=86400;
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+        add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,lang,access-token';
+    }
+
+    location ~* \.(xls|xlsx)$ {
+		expires 30d;
+		root /home/PatientService/excel;
+		add_header    Cache-Control  max-age=86400;
+    }
+
+
 }

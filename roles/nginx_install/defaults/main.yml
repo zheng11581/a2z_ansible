@@ -45,3 +45,8 @@ nginx_www: /var/www/html
 domain_name: 192.168.3.216
 ssl_cert: demo.pem
 ssl_key: demo.key
+api_proxy: http://xxxx:8082/
+
+
+
+
