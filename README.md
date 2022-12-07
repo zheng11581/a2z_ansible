@@ -10,6 +10,13 @@
 
 ## 使用
 
+拷贝公钥到 hostgroup 主机
+
+```shell
+export PATH=/root/.local/bin/:$PATH && ansible-playbook -e hostgroup=zabbix-agent -i inventory/hosts.yml ssh-key-copy.yml
+```
+
+
 安装 mysql 单节点
 
 ```shell

@@ -1,0 +1,9 @@
+- name: Inatall Zabbix agent
+  hosts: "{{ hostgroup | default('zabbix-agent') }}"
+  become: true
+  any_errors_fatal: true
+  remote_user: root
+  become_user: root
+  roles:
+  - zabbix_install
+

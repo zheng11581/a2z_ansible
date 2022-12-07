@@ -1,0 +1,46 @@
+  # - name: Copy RPM package to remote 
+  #   ansible.builtin.copy:
+  #     src: "{{packages_dir}}/{{zabbix_package}}"
+  #     dest: /root/{{zabbix_package}}
+  #     owner: root
+  #     group: root
+  #     mode: 0644
+
+  # - name: Install zabbix agent
+  #   ansible.builtin.yum:
+  #     name: /root/{{zabbix_package}}
+  #     state: present
+
+  # - name: Replace zabbix agent configration
+  #   ansible.builtin.template:
+  #     src: zabbix_agentd.conf.j2
+  #     dest: /etc/zabbix/zabbix_agentd.conf
+  #     owner: root
+  #     group: root
+  #     mode: 0644
+
+  - name: Restart zabbix agent 
+    ansible.builtin.service:
+      name: zabbix-agent
+      state: restarted
+      enabled: yes
+
+  # - name: Start firewall service
+  #   ansible.builtin.service:
+  #     name: firewalld
+  #     state: restarted
+  #     enabled: yes
+
+  # - name: Open 10050 port
+  #   ansible.builtin.command: 
+  #     cmd: firewall-cmd --permanent --zone=public --add-port=10050/tcp
+  
+  # - name: Reload firewall
+  #   ansible.builtin.command:
+  #     cmd: firewall-cmd --reload
+
+  # - name: Stoped firewall service
+  #   ansible.builtin.service:
+  #     name: firewalld
+  #     state: stopped
+  #     enabled: yes

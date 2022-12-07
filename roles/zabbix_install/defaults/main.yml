@@ -1,0 +1,4 @@
+packages_dir: /root/softwares/zabbix
+zabbix_package: zabbix-agent-4.0.23-1.el7.x86_64.rpm
+zabbix_proxy: 192.168.110.101
+
