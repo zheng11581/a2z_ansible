@@ -126,7 +126,7 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub <host>
 
     ```
 
-    - 执行 mysql 安装 playbook
+    - 执行 springboot 安装 playbook
 
     ```shell
     export PATH=/root/.local/bin/:$PATH && ansible-playbook -e hostgroup=springboot -i inventory/hosts.yml install-application.yml
