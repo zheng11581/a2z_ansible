@@ -10,24 +10,102 @@
 
 ## 使用
 
-拷贝公钥到 hostgroup 主机
+- 拷贝公钥到待安装的主机上
 
 ```shell
-export PATH=/root/.local/bin/:$PATH && ansible-playbook -e hostgroup=zabbix-agent -i inventory/hosts.yml ssh-key-copy.yml
+ssh-copy-id -i ~/.ssh/id_rsa.pub <host>
 ```
 
-
-安装 mysql 单节点
+- 修改 Ansible controller 主机上的 /etc/hosts
 
 ```shell
-export PATH=/root/.local/bin/:$PATH && ansible-playbook -e hostgroup=mysql -i inventory/hosts.yml install-mysql.yml
+# vi /etc/hosts
+192.168.3.215   mysql57.db # mysql 对应的主机
+192.168.3.216   app.gw # nginx redis nacos 对应的主机
 ```
 
-安装 nacos redis nginx
+- 安装 mysql 单节点
 
-```shell
-export PATH=/root/.local/bin/:$PATH && ansible-playbook -e hostgroup=application -i inventory/hosts.yml install-application.yml
-```
+    - 配置 MySQL 安装参数
+    
+    修改 roles/mysql_install/defaults/main.yml 文件
+    
+    ```shell
+    # mysql 安装包在Ansible controller上所在的目录
+    mysql_packages_dir: /root/softwares/mysql/
+
+    # mysql 安装包的名字
+    mysql_package: mysql-5.7.39-linux-glibc2.12-x86_64.tar.gz
+    # mysql_package: mysql-8.0.30-linux-glibc2.17-x86_64-minimal.tar.xz
+
+    # mysql 安装目录
+    mysql_base_dir: /usr/local/mysql/
+
+    # mysql 真正的 datadir 就会是 mysql_data_dir_base + mysql_port
+    mysql_data_dir_base: /glzt/mysql/data/
+
+    # mysql 端口
+    mysql_port: 3306
+
+    # root 密码
+    mysql_root_password: mtls0352
+
+    ```
+
+    - 执行 mysql 安装 playbook
+
+    ```shell
+    export PATH=/root/.local/bin/:$PATH && ansible-playbook -e hostgroup=mysql -i inventory/hosts.yml install-mysql.yml
+    ```
+
+- 安装 nacos redis nginx
+
+    - 配置安装参数
+
+    roles/nacos_install/defaults/main.yml（安装包在本地）
+
+    ```shell
+    # nacos 安装包在Ansible controller上所在的目录
+    packages_dir: /root/softwares/nacos
+    nacos_package: nacos-server-2.1.2.zip
+
+    # 是否安装 jdk
+    java_install: true
+
+    # jdk 包名称
+    java_package: 
+    - java-11-openjdk.x86_64
+    - java-11-openjdk-devel.x86_64
+    
+    # nacos 安装目录
+    nacos_home: /opt
+    ```
+
+    roles/redis_install/defaults/yml（安装包在网上）
+
+    ```shell
+    # redis 版本
+    redis_version: 5.0.0
+    # redis 安装目录
+    redis_install_dir: /opt/redis
+    # redis 端口
+    redis_dir: /var/lib/redis/{{ redis_port }}
+
+    ```
+
+    roles/nginx_install/defaults/yml（安装包在本地）
+
+    ```shell
+    packages_dir: /root/softwares/nginx
+    nginx_package: nginx-1.23.0
+
+    ```
+
+    - 执行安装 playbook
+
+    ```shell
+    export PATH=/root/.local/bin/:$PATH && ansible-playbook -e hostgroup=application -i inventory/hosts.yml install-application.yml
+    ```
 
 <!-- ```shell
 export ANSIBLE_LIBRARY=`pwd`/plugins/modules && ansible-playbook -e hostgroup=oracle -i inventory/hosts.yml single-oracle.yml
