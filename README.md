@@ -22,6 +22,7 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub <host>
 # vi /etc/hosts
 192.168.3.215   mysql57.db # mysql 对应的主机
 192.168.3.216   app.gw # nginx redis nacos 对应的主机
+192.168.3.217   app.backend # springboot 对应的主机
 ```
 
 - 安装 mysql 单节点
@@ -105,6 +106,30 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub <host>
 
     ```shell
     export PATH=/root/.local/bin/:$PATH && ansible-playbook -e hostgroup=application -i inventory/hosts.yml install-application.yml
+    ```
+
+- 安装 springboot 后端服务
+
+    - 配置 安装参数
+    
+    修改 roles/springboot_install/defaults/main.yml 文件
+    
+    ```shell
+    # 是否需要安装 jdk
+    springboot_java_install: false
+
+    # 需要安装后端服务的信息
+    springboot_applications:
+    - { deploy_folder: '/opt/record', src_file: '/root/softwares/application/Record-1.0.0-SNAPSHOT.jar', application_name: 'Record-1.0.0-SNAPSHOT.jar', configuration_template: false, startup: 'startup.sh' }
+    springboot_group: springboot
+    springboot_user: springboot
+
+    ```
+
+    - 执行 mysql 安装 playbook
+
+    ```shell
+    export PATH=/root/.local/bin/:$PATH && ansible-playbook -e hostgroup=mysql -i inventory/hosts.yml install-mysql.yml
     ```
 
 <!-- ```shell

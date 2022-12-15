@@ -1,0 +1,9 @@
+---
+ - name: Install Application - application
+   hosts: "{{ hostgroup | default('springboot') }}"
+   become: true
+   any_errors_fatal: true
+   remote_user: root
+   become_user: root
+   roles:
+    - springboot_install
