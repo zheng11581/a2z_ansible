@@ -1,27 +1,9 @@
 ---
 # Install java by default. Optional
-springboot_java_install: true
+springboot_java_install: false
 
-# Mandatory variable : path to springboot jar to deploy.
-# Either specify a file or a url depending on if you want to copy you app or download it.
-springboot_src_file: None
-springboot_src_url: None
+springboot_applications:
+  - { deploy_folder: '/opt/record', src_file: '/root/softwares/application/Record-1.0.0-SNAPSHOT.jar', application_name: 'Record-1.0.0-SNAPSHOT.jar', configuration_template: false, startup: 'startup.sh' }
 
-# Mandatory variable : spring boot application name
-springboot_application_name: None
-
-# Optional : you can specify a template file to manage you app properties
-springboot_propertyfile_template: None
-
-# Optional : you can specify a template file to manage you app configuration
-# (see : https://docs.spring.io/spring-boot/docs/current/reference/html/deployment-install.html#deployment-script-customization-when-it-runs)
-springboot_configuration_template: None
-
-# Deploy folder
-springboot_deploy_folder: /opt/{{ springboot_application_name }}
-
-# linux user to start the service
-springboot_user: springboot
-
-# linux group to start the service
 springboot_group: springboot
+springboot_user: springboot

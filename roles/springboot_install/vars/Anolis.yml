@@ -1,0 +1,2 @@
+---
+java: "{{ springboot_java | default('java-11-openjdk.x86_64') }}"

@@ -1,0 +1,47 @@
+- name: "Create deploy folder if not exists"
+  file:
+    path: "{{ item.deploy_folder }}"
+    state: directory
+    owner: "{{ springboot_user }}"
+    group: "{{ springboot_group }}"
+  loop: "{{ springboot_applications }}"
+
+- name: "Copy jar application"
+  copy:
+    src: "{{ item.src_file }}"
+    dest: "{{ item.deploy_folder }}/{{ item.application_name }}.jar"
+    owner: "{{ springboot_user }}"
+    group: "{{ springboot_group }}"
+    mode: "u+x"
+  loop: "{{ springboot_applications }}"
+  # notify:
+  #   - "Restart application"
+
+- name: "Deploy app config"
+  template:
+    src: "{{ item.configuration_template }}"
+    dest: "{{ item.deploy_folder }}"
+    owner: "{{ springboot_user }}"
+    group: "{{ springboot_group }}"
+  when: item.configuration_template
+  loop: "{{ springboot_applications }}"
+  # notify:
+  #   - "Restart application"
+
+- name: "Generate startup.sh"
+  shell: |
+    cat << EOF > {{item.deploy_folder}}/{{item.startup}}
+    #!/bin/bash
+    export JAVA_HOME=/usr/lib/jvm/jre-openjdk
+    export JRE_HOME=\$JAVA_HOME
+    export CLASSPATH=.:\$JAVA_HOME/lib:\$JRE_HOME/lib
+    export PATH=\$JAVA_HOME/bin:$PATH
+    nohup java -jar -server {{item.deploy_folder}}/{{item.application_name}} > /dev/null 2>&1 &
+    EOF
+  loop: "{{ springboot_applications }}"
+  # notify:
+  #   - "Restart application"
+
+- name: "Start App"
+  command: bash "{{ item.deploy_folder }}/{{ item.startup }}"
+  loop: "{{ springboot_applications }}"
