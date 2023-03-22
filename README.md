@@ -43,7 +43,7 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub <host>
     mysql_base_dir: /usr/local/mysql/
 
     # mysql 真正的 datadir 就会是 mysql_data_dir_base + mysql_port
-    mysql_data_dir_base: /glzt/mysql/data/
+    mysql_data_dir_base: /glzt/mysql/
 
     # mysql 端口
     mysql_port: 3306
@@ -88,9 +88,9 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub <host>
     # redis 版本
     redis_version: 5.0.0
     # redis 安装目录
-    redis_install_dir: /opt/redis
+    redis_install_dir: /glzt/redis
     # redis 端口
-    redis_dir: /var/lib/redis/{{ redis_port }}
+    redis_dir: /glzt/redis/{{ redis_port }}
 
     ```
 
@@ -98,7 +98,7 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub <host>
 
     ```shell
     packages_dir: /root/softwares/nginx
-    nginx_package: nginx-1.23.0
+    nginx_package: nginx-1.23.3
 
     ```
 

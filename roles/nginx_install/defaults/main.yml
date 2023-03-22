@@ -1,5 +1,5 @@
 packages_dir: /root/softwares/nginx
-nginx_package: nginx-1.23.0
+nginx_package: nginx-1.23.3
 common_packages:
   "{% if ansible_distribution_major_version | int == 6 %}{{ common_packages_el6 }}\
   {%- elif ansible_distribution_major_version | int == 7 %}{{ common_packages_el7 }}\
