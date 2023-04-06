@@ -1,5 +1,5 @@
 packages_dir: /root/softwares/nginx
-nginx_package: nginx-1.23.3
+nginx_package: nginx-1.23.4
 common_packages:
   "{% if ansible_distribution_major_version | int == 6 %}{{ common_packages_el6 }}\
   {%- elif ansible_distribution_major_version | int == 7 %}{{ common_packages_el7 }}\
@@ -36,9 +36,9 @@ common_packages_el8:
   - zlib-devel
   - openssl 
   - openssl-devel
-nginx_home: /opt/nginx
+nginx_home: /glzt/nginx
 nginx_modules: "--with-http_ssl_module --with-http_stub_status_module"
-nginx_www: /var/www/html
+nginx_www: "{{ nginx_home }}/html"
 
 # nginx 配置文件相关
 # C端
