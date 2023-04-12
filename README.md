@@ -79,7 +79,7 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub <host>
     - java-11-openjdk-devel.x86_64
     
     # nacos 安装目录
-    nacos_home: /opt
+    nacos_home: /glzt
     ```
 
     roles/redis_install/defaults/yml（安装包在网上）
