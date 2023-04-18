@@ -1,14 +1,4 @@
 ---
-- name: add redis user
-  user:
-    name: "{{ redis_user }}"
-    group: "{{ redis_group }}"
-    comment: "Redis"
-    home: "{{ redis_install_dir }}"
-    shell: /bin/false
-    system: yes
-  when: user_exists is failed
-
 - name: enable overcommit in sysctl
   ansible.posix.sysctl:
     name: vm.overcommit_memory
@@ -24,6 +14,28 @@
     chdir: /usr/local/src/redis-{{ redis_version }}
     creates: /usr/local/src/redis-{{ redis_version }}/src/redis-server
 
+- name: check if redis user exists (ignore errors)
+  command: id {{ redis_user }}
+  ignore_errors: true
+  changed_when: false
+  register: user_exists
+
+- name: add redis user
+  user:
+    name: "{{ redis_user }}"
+    group: "{{ redis_group }}"
+    comment: "Redis"
+    home: "{{ redis_install_dir }}"
+    shell: /bin/false
+    system: yes
+  when: user_exists is failed
+
+- name: add redis group
+  group:
+    name: "{{ redis_group }}"
+    state: present
+  when: user_exists is failed
+
 - name: create redis install directory
   file:
     path: "{{ redis_install_dir }}"
@@ -31,18 +43,6 @@
     mode: 0755
     group: "{{ redis_group }}"
     owner: "{{ redis_user }}"
-
-- name: check if redis user exists (ignore errors)
-  command: id {{ redis_user }}
-  ignore_errors: true
-  changed_when: false
-  register: user_exists
-
-- name: add redis group
-  group:
-    name: "{{ redis_group }}"
-    state: present
-  when: user_exists is failed
 
 - name: create /etc/redis
   file:
