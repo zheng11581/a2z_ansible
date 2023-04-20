@@ -12,8 +12,8 @@
 
  - name: initialize-insecure for mysql-5.7.x
    when: " 'mysql-5.7' in mysql_package "
-   ansible.builtin.shell: /usr/local/mysql/bin/mysqld --defaults-file=/etc/my.cnf --datadir={{mysql_data_dir_base}}{{mysql_port}} --initialize-insecure
+   ansible.builtin.shell: /usr/local/mysql/bin/mysqld --defaults-file=/etc/my.cnf --datadir={{mysql_data_dir_base}}/{{mysql_port}} --initialize-insecure
 
  - name: initialize-insecure for mysql-8.0.x
    when: " 'mysql-8.0' in mysql_package "
-   ansible.builtin.shell: /usr/local/mysql/bin/mysqld --defaults-file=/etc/my.cnf --datadir={{mysql_data_dir_base}}{{mysql_port}} --initialize-insecure
+   ansible.builtin.shell: /usr/local/mysql/bin/mysqld --defaults-file=/etc/my.cnf --datadir={{mysql_data_dir_base}}/{{mysql_port}} --initialize-insecure
