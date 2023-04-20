@@ -1,4 +1,14 @@
 ---
+- name: Get stats of the mysql install package
+  ansible.builtin.stat:
+    path: /usr/local/{{ mysql_package | regex_replace('.tar.gz','')}}
+  register: remote_mysql_package
+  when: mysql_package.find('tar.gz') != -1
+
+- name: Print a debug message
+  ansible.builtin.debug:
+    msg: "{{ remote_mysql_package }}"
+
 #由本地传输mysql安装包到目标主机、并把安装包解压到/usr/local/目录
 #等价bash
 #scp mysql-xxxx.tar.gz 192.168.xx.xx:/tmp/
@@ -9,6 +19,7 @@
     dest: /usr/local/
     owner: mysql
     group: mysql
+  when: not remote_mysql_package.stat.exists
 
 #设置权限
 #等价bash
@@ -33,20 +44,20 @@
 #创建连接文件
 #等价bash
 #ln -s /usr/local/mysql-xxxx /usr/local/mysql
-- name: make link /usr/local/mysql-xx.yy.zz to /usr/local/mysql
+- name: make link /usr/local/mysql-xx.yy.zz to {{ mysql_base_dir }}
   when: mysql_package.find('tar.gz') != -1
   file:
     src: /usr/local/{{ mysql_package | regex_replace('.tar.gz','') }}
-    dest: /usr/local/mysql
+    dest: "{{ mysql_base_dir | regex_replace('^(.*)/$','\\1') }}"
     state: link
     owner: mysql
     group: mysql
 
-- name: make link /usr/local/mysql-xx.yy.zz to /usr/local/mysql
+- name: make link /usr/local/mysql-xx.yy.zz to {{ mysql_base_dir }}
   when: mysql_package.find('tar.xz') != -1
   file:
     src: /usr/local/{{ mysql_package | regex_replace('.tar.xz','') }}
-    dest: /usr/local/mysql
+    dest: "{{ mysql_base_dir | regex_replace('^(.*)/$','\\1') }}"
     state: link
     owner: mysql
     group: mysql
@@ -65,13 +76,13 @@
 - name: export path env variable
   ansible.builtin.lineinfile:
     path: /etc/profile
-    line: export PATH=/usr/local/mysql/bin/:$PATH
+    line: export PATH={{ mysql_base_dir | regex_replace('^(.*)/$','\\1') }}/bin/:$PATH
     insertafter: EOF
 
 - name: export path env to /root/.bashrc
   ansible.builtin.lineinfile:
     path: /root/.bashrc
-    line: export PATH=/usr/local/mysql/bin/:$PATH
+    line: export PATH={{ mysql_base_dir | regex_replace('^(.*)/$','\\1') }}/bin/:$PATH
     insertafter: EOF
 
 - name: remove /usr/include/mysql
@@ -82,7 +93,7 @@
 #导出头文件
 - name: export include file to /usr/include/mysql
   ansible.builtin.file:
-    src: /usr/local/mysql/include
+    src: "{{ mysql_base_dir | regex_replace('^(.*)/$','\\1') }}/include"
     dest: /usr/include/mysql
     state: link
 
