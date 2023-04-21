@@ -1,4 +1,4 @@
-- name: "Create deploy folder if not exists"
+- name: "Springboot - Create deploy folder if not exists"
   file:
     path: "{{ item.deploy_folder }}"
     state: directory
@@ -6,10 +6,10 @@
     group: "{{ springboot_group }}"
   loop: "{{ springboot_applications }}"
 
-- name: "Copy jar application"
+- name: "Springboot - Copy jar application"
   copy:
     src: "{{ item.src_file }}"
-    dest: "{{ item.deploy_folder }}/{{ item.application_name }}.jar"
+    dest: "{{ item.deploy_folder }}/{{ item.app_bin }}.jar"
     owner: "{{ springboot_user }}"
     group: "{{ springboot_group }}"
     mode: "u+x"
@@ -17,7 +17,7 @@
   # notify:
   #   - "Restart application"
 
-- name: "Deploy app config"
+- name: "Springboot - Deploy app config"
   template:
     src: "{{ item.configuration_template }}"
     dest: "{{ item.deploy_folder }}"
@@ -26,22 +26,61 @@
   when: item.configuration_template
   loop: "{{ springboot_applications }}"
   # notify:
-  #   - "Restart application"
+  # - "Restart application"
 
-- name: "Generate startup.sh"
+- name: "Springboot - Generate startup.sh"
   shell: |
     cat << EOF > {{item.deploy_folder}}/{{item.startup}}
     #!/bin/bash
-    export JAVA_HOME=/usr/lib/jvm/jre-openjdk
+    export JAVA_HOME={{ springboot_java_home | default('/usr/lib/jvm/jre-openjdk', boolean=true) }}
     export JRE_HOME=\$JAVA_HOME
     export CLASSPATH=.:\$JAVA_HOME/lib:\$JRE_HOME/lib
     export PATH=\$JAVA_HOME/bin:$PATH
-    nohup java -jar -server {{item.deploy_folder}}/{{item.application_name}} > /dev/null 2>&1 &
+    NACOS_URL={{ springboot_nacos.url | default('localhost:8848', boolean=true) }}
+    NACOS_NS={{ springboot_nacos.namespace | default('public', boolean=true) }}
+    NACOS_USER={{ springboot_nacos.user | default('nacos', boolean=true)}}
+    NACOS_PWD={{ springboot_nacos.password | default('nacos', boolean=true) }}
+    NACOS_OPT="-Dspring.cloud.nacos.config.server-addr=\$NACOS_URL -Dspring.cloud.nacos.discovery.server-addr=\$NACOS_URL -Dspring.cloud.nacos.config.namespace=\$NACOS_NS -Dspring.cloud.nacos.discovery.namespace=\$NACOS_NS -Dspring.cloud.nacos.config.username=\$NACOS_USER -Dspring.cloud.nacos.config.password=\$NACOS_PWD -Dspring.cloud.nacos.discovery.username=\$NACOS_USER -Dspring.cloud.nacos.discovery.password=\$NACOS_PWD
+    JVM_OPT={{ item.jvm_opt }}
+    nohup java -jar \$NACOS_OPT \$JVM_OPT {{item.deploy_folder}}/{{item.app_bin}} > /dev/null 2>&1 &
     EOF
   loop: "{{ springboot_applications }}"
   # notify:
   #   - "Restart application"
 
-- name: "Start App"
+- name: "Springboot - Start App"
   command: bash "{{ item.deploy_folder }}/{{ item.startup }}"
   loop: "{{ springboot_applications }}"
+
+- name: "Springboot - Auto-startup App - appctl"
+  template:
+    src: appctl.j2
+    dest: /usr/local/bin/appctl
+    mode: 0644
+
+- name: Springboot - Creates a cron file under /etc/cron.d
+  ansible.builtin.cron:
+    name: appctl autostart
+    minute: "*/5"
+    user: root
+    job: "/usr/local/bin/appctl all start"
+    cron_file: ansible_appctl-autostart
+
+# - name: Install EPEL Repo
+#   when:
+#     - configure_epel_repo
+#     - ansible_os_family == 'RedHat'
+#   tags:
+#     - epelrepo
+#   block:
+#     - name: Install GPG Key for EPEL
+#       ansible.builtin.rpm_key:
+#         state: present
+#         key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}
+
+#     - name: Add EPEL Repo
+#       ansible.builtin.yum:
+#         name: "{{ epel_rpm }}"
+#         state: installed
+
+

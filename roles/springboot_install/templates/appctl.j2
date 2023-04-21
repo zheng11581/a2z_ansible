@@ -1,0 +1,349 @@
+#!/bin/bash
+source /etc/profile
+export JAVA_HOME={{ springboot_java_home }}
+export CLASS_PATH=$JAVA_HOME/lib:$JAVA_HOME/jre/lib:$JAVA_HOME/lib/tools.jar:$CLASS_PATH
+export PATH=$JAVA_HOME/bin:$PATH
+export NACOS_URL=http://{{ springboot_nacos }}
+function Config(){
+#配置服务标识,服务别名,服务筛选关键字,服务启动路径
+{% for app in springboot_applications %}
+configService,"{{ app.app_short_name }}","{{ app.app_long_name }}",cd {{ app.deploy_folder }} && bash {{ app.deploy_folder }}/{{ app.startup }} &
+{% endfor %}
+}
+function Prestart() {
+	NacosHealth=$(curl -i -s -m 2 $NACOS_URL/nacos/v1/ns/operator/servers |grep HTTP|awk '{print $2}')
+	if [[ $NacosHealth -ne 200 && $NacosHealth -ne 302 ]]; then
+		echo -e "\n*** ${NACOS_URL} 无法注册，请稍后再试 ***"
+		exit 1
+	fi
+}
+
+function CheckConfigFormat(){
+rm -rf /tmp/TemFile
+mkdir -p /tmp/TemFile
+grep "^configService" $0 >>/tmp/TemFile/configServiceFile.log
+grep "^configService" $0|cut -d , -f 2 >>/tmp/TemFile/configServiceNameFile.log
+ServiceNameNum=`cat /tmp/TemFile/configServiceNameFile.log|wc -l`
+CurServiceNameNum=1
+while [ ${CurServiceNameNum} -le `cat /tmp/TemFile/configServiceNameFile.log|wc -l` ]
+do 
+    CheckService=`sed -n ${CurServiceNameNum}p /tmp/TemFile/configServiceNameFile.log`
+	if [ `grep -c "^configService,${CheckService}" /tmp/TemFile/configServiceNameFile.log` -gt 1 ]; then
+	    echo -e "\n*** ${CheckService} 在配置列表中重复出现 ***"
+		echo ${CheckService} >>/tmp/TemFile/CheckServiceFile.log
+	fi
+    let CurServiceNameNum++	
+done
+if [ -s /tmp/TemFile/CheckServiceFile.log ]; then
+	echo -e "\n"
+	exit 0
+fi	 	
+if [ -s /tmp/TemFile/configServiceFile.log ]; then 
+    CurServiceNum=1
+    while [ ${CurServiceNum} -le `cat /tmp/TemFile/configServiceFile.log|wc -l` ]
+	do
+	    serviceLineth=`sed -n ${CurServiceNum}p /tmp/TemFile/configServiceFile.log`
+		if [ `echo ${serviceLineth}|grep -o ","|wc -l` -lt 3 ]; then
+		    echo -e "\n*** 此行配置为: ${serviceLineth} ***"
+		    echo "*** 服务配置缺少字段或者字段分隔符存在中文下的\"，\" ***"
+			echo -e "\n"
+			echo "1" >>/tmp/TemFile/exitTag.log
+	   else
+	       if [ "`echo ${serviceLineth}|cut -d , -f 1`" != "configService" ]; then
+		       echo -e "\n*** 此行配置为: ${serviceLineth} ***"
+		       echo " *** 服务配置标识不正确，应为:\"configService\" ***"
+			   echo -e "\n"
+			   echo "1" >>/tmp/TemFile/exitTag.log
+			fi
+			if [ -z "`echo ${serviceLineth}|cut -d , -f 2`" ]; then
+		       echo -e "\n*** 此行配置为: ${serviceLineth} ***"
+		       echo " *** 此行配置缺少服务别名 ***"
+			   echo -e "\n"
+			   echo "1" >>/tmp/TemFile/exitTag.log
+			fi
+			if [ -z "`echo ${serviceLineth}|cut -d , -f 3`" ]; then
+		       echo -e "\n*** 此行配置为: ${serviceLineth} ***"
+		       echo " *** 此行配置的服务`echo ${serviceLineth}|cut -d , -f 2`,缺少服务关键字 ***"
+			   echo -e "\n"
+			   echo "1" >>/tmp/TemFile/exitTag.log
+			fi
+            if [ -z "`echo ${serviceLineth}|cut -d , -f 4`" ]; then
+		       echo -e "\n*** 此行配置为: ${serviceLineth} ***"
+		       echo "*** 此行配置的服务`echo ${serviceLineth}|cut -d , -f 2`,缺少启动路径 ***"
+			   echo -e "\n"
+			   echo "1" >>/tmp/TemFile/exitTag.log
+			#elif [ ! -f `echo ${serviceLineth}|cut -d , -f 4|awk '{print$1}'` ];then
+			#   echo -e "\n*** 此行配置为: ${serviceLineth} ***"
+		    #  echo " *** 此行配置的服务`echo ${serviceLineth}|cut -d , -f 2`,可能未安装，找不到启动文件 ***" 
+			#   echo -e "\n"
+			#   echo "1" >>/tmp/TemFile/exitTag.log
+			fi			
+		fi
+		let CurServiceNum++
+	done
+else
+    echo -e "\n**************************************************************************************" 
+    echo "*** 没有可用的服务，或者配置文件格式不正确                                         ***"
+    echo "*** 配置服务标识,服务别名,服务筛选关键字,服务启动路径                              ***"	
+    echo "*** configService,UserService,UserService,java -jar /glzt/consultService/UserService/UserService.jar --spring.profiles.active=dev >> /glzt/consultService/UserService/2019.log & ***"
+    echo "*** 字段之间用英文的\",\"隔开                                                       ***"
+	echo "***************************************************************************************"
+	echo -e "\n"
+	exit 0
+fi
+if [ -s /tmp/TemFile/exitTag.log ]; then
+    exit 0
+fi
+}
+function getProgramPid(){
+   if [ "${ServiceAlias}" == "all" ] ;then
+         ServiceNameList=`grep "^configService" $0|cut -d , -f 2`
+         for ServiceName in $ServiceNameList
+	     do
+		   ServiceKey=`grep "^configService,${ServiceName}," $0|cut -d , -f 3`
+		    ServicePid=`ps -ef|grep -w "${ServiceKey}"|grep -v grep|awk '{if($3 == 1) print$2}'|head -n 1`
+			if [ ! -z $ServicePid ]; then
+				if [ ! -d /usr/local/Microservice/${ServiceName} ];then
+					mkdir -p /usr/local/Microservice/${ServiceName}
+				fi
+				echo ${ServicePid} >/usr/local/Microservice/${ServiceName}/${ServiceName}.pid
+		    fi
+		done
+   else
+        ServiceKey=`grep "^configService,${ServiceAlias}," $0|cut -d , -f 3`
+        ServicePid=`ps -ef|grep -w "${ServiceKey}"|grep -v grep|awk '{if($3 == 1) print$2}'|head -n 1` 
+		if [ ! -z $ServicePid ]; then
+			if [ ! -d /usr/local/Microservice/${ServiceAlias} ];then
+			   mkdir -p /usr/local/Microservice/${ServiceAlias}
+			fi
+			echo ${ServicePid} >/usr/local/Microservice/${ServiceAlias}/${ServiceAlias}.pid
+		fi
+   fi
+}
+function Start(){
+	Prestart
+    if [ ! -d /tmp/AppService ];then
+         mkdir -p /tmp/AppService
+    fi
+    if [ "${ServiceAlias}" == "all" ] ;then
+       ServiceNameList=`grep "^configService" $0|cut -d , -f 2`
+       for ServiceName in $ServiceNameList
+	   do
+	       ServiceKey=`grep "^configService,${ServiceName}," $0|cut -d , -f 3`
+	       if [ -z `ps -ef|grep -w "${ServiceKey}"|grep -v grep|awk '{if($3 == 1) print$2}'|head -n 1` ];then
+			   startPath=`grep "^configService,${ServiceName}," $0|cut -d , -f 4`
+			   if [ -z "$startPath" ];then
+			       echo -e "\n*** ${ServiceName} 启动路径不存在，请查看配置文件..."
+				   echo -e "\n"
+				   exit 0
+			   else
+                   echo ${startPath} >/tmp/AppService/${ServiceName}
+                   chmod 755 /tmp/AppService/${ServiceName}
+			       nohup /tmp/AppService/${ServiceName} >/dev/null 2>&1 &
+				   echo -e "\n"
+				   echo -n "*** ${ServiceName} 启动中......"
+				   timeNum=0
+				   while [ -z "`ps -ef|grep -w "${ServiceKey}"|grep -v grep|awk '{if($3 == 1) print$2}'`" ] && [ ${timeNum} -le 10 ]
+				   do
+						 echo -n "..."
+						 if [ ${timeNum} -eq 10 ]; then
+							 echo -n "异常... 已等待10秒，仍无反应，请检查${ServiceName}服务***"
+						 fi
+						 let timeNum++
+						 sleep 1
+                   done	
+                   if [ ! -d /usr/local/Microservice/${ServiceName} ];then
+					   mkdir -p /usr/local/Microservice/${ServiceName}
+				   fi				   
+		           echo -e "\n*** `date +%Y-%m-%d_%H:%M:%S`  ${ServiceName}  start  ***" >>/usr/local/Microservice/${ServiceName}/${ServiceName}_Stop.log
+		           [ ${timeNum} -lt 10 ] && echo -n "成功! [PID] = `ps -ef|grep -w "${ServiceKey}"|grep -v grep|awk '{if($3 == 1) print$2}'|head -n 1` ***"
+				   echo -e "\n"
+			   fi 
+				  
+          else   
+               echo -e "\n*** ${ServiceName} 正在运行... [PID] = `ps -ef|grep -w "${ServiceKey}"|grep -v grep|awk '{if($3 == 1) print$2}'|head -n 1` ***" 
+               echo -e "\n"			   
+          fi
+		done
+  else
+		ServiceKey=`grep "^configService,${ServiceAlias}," $0|cut -d , -f 3`
+		if [ -z "`ps -ef|grep -w "${ServiceKey}"|grep -v grep|awk '{if($3 == 1) print$2}'|head -n 1`" ];then
+		    startPath=`grep "^configService,${ServiceAlias}," $0|cut -d , -f 4`
+			if [ -z "$startPath" ]; then
+			     echo -e "\n*** ${ServiceAlias} 启动路径不存在，请查看配置文件..."
+				 echo -e "\n"
+				 exit 0
+		  else
+                echo ${startPath} >/tmp/AppService/${ServiceAlias}
+                chmod 755 /tmp/AppService/${ServiceAlias}
+				nohup /tmp/AppService/${ServiceAlias} >/dev/null 2>&1 &
+				echo -e "\n"
+				echo -n "*** ${ServiceAlias} 启动中......"
+				timeNum=0
+				while [ -z "`ps -ef|grep -w "${ServiceKey}"|grep -v grep|awk '{if($3 == 1) print$2}'`" ] && [ ${timeNum} -le 10 ]
+			    do
+				    echo -n "..."
+					if [ ${timeNum} -eq 10 ]; then
+						echo -n "异常...已等待10秒，仍无反应，请检查${ServiceAlias}服务***"
+					fi
+					let timeNum++
+				    sleep 1
+                done	
+				if [ ! -d /usr/local/Microservice/${ServiceAlias} ];then
+			         mkdir -p /usr/local/Microservice/${ServiceAlias}
+			    fi
+				echo -e "\n*** `date +%Y-%m-%d_%H:%M:%S`  ${ServiceName}  start  ***" >>/usr/local/Microservice/${ServiceAlias}/${ServiceAlias}_Stop.log
+				[ ${timeNum} -lt 10 ] && echo -n "成功! [PID] = `ps -ef|grep -w "${ServiceKey}"|grep -v grep|awk '{if($3 == 1) print$2}'|head -n 1`  ***"
+				echo -e "\n"
+		    fi
+      else			   
+               echo -e "\n*** ${ServiceAlias} 正在运行... [PID] = `ps -ef|grep -w "${ServiceKey}"|grep -v grep|awk '{if($3 == 1) print$2}'|head -n 1` ***"
+			   echo -e "\n"
+		fi
+   fi
+}
+function Stop(){  
+   if [ "${ServiceAlias}" == "all" ] ;then
+		   ServiceNameList=`grep "^configService" $0|cut -d , -f 2`
+		   for ServiceName in $ServiceNameList
+		   do
+		          ServiceKey=`grep "^configService,${ServiceName}," $0|cut -d , -f 3`
+				  ServiceNamePid=`ps -ef|grep -w "${ServiceKey}"|grep -v grep|awk '{if($3 == 1) print$2}'|head -n 1`
+				  if [ -z "$ServiceNamePid" ];then
+				      echo -e "\n*** ${ServiceName} 没有运行... ***"
+					  echo -e "\n"
+				  else
+				      PidFlag=1
+					  while [ $PidFlag -eq 1 ] || [ ! -z "`ps -ef|grep -w "${ServiceKey}"|grep -v grep|awk '{if($3 == 1) print$2}'|head -n 1`" ]
+					  do
+					     ps -ef|grep -w "${ServiceNamePid}"|grep -v grep|grep -v "${scriptName}" >/usr/local/Microservice/killPid.log
+						 CurLine=1
+						 TotalLine=`cat /usr/local/Microservice/killPid.log|wc -l`
+						 while [ $CurLine -le $TotalLine ]
+						 do
+						    CurPid=`sed -n ${CurLine}p /usr/local/Microservice/killPid.log|awk '{print$3}'`
+						    if [ "$CurPid"  == "$ServiceNamePid" ]; then
+						        kill -9 `cat /usr/local/Microservice/killPid.log|awk '{print$2}'` >/dev/null 2>&1							   
+                            fi	
+                            let CurLine++							
+						done	
+                         PidFlag=0						
+					    kill -9 $ServiceNamePid >/dev/null 2>&1						    
+					  done
+				      rm -rf /usr/local/Microservice/${ServiceName}/${ServiceName}.pid
+					  echo -e "\n*** ${ServiceName} 已经停止... ***"
+					  echo -e "\n"
+				  fi
+		   done
+  else
+         ServiceKey=`grep "^configService,${ServiceAlias}," $0|cut -d , -f 3`
+		 ServiceNamePid=`ps -ef|grep -w "${ServiceKey}"|grep -v grep|awk '{if($3 == 1) print$2}'|head -n 1`
+	     if [ -z "$ServiceNamePid" ];then
+		     echo -e "\n*** ${ServiceAlias} 没有运行... ***"
+			 echo -e "\n"
+		else
+            PidFlag=1
+			while [ $PidFlag -eq 1 ] || [ ! -z "`ps -ef|grep -w "${ServiceKey}"|grep -v grep|awk '{if($3 == 1) print$2}'|head -n 1`" ] 
+            do	
+			   ps -ef|grep -w "${ServiceNamePid}"|grep -v grep|grep -v "${scriptName}" >/usr/local/Microservice/killPid.log
+			   CurLine=1
+			   TotalLine=`cat /usr/local/Microservice/killPid.log|wc -l`
+			   while [ $CurLine -le $TotalLine ]
+			   do
+			        CurPid=`sed -n ${CurLine}p /usr/local/Microservice/killPid.log|awk '{print$3}'`
+					if [ "$CurPid"  == "$ServiceNamePid" ]; then
+						 kill -9 `cat /usr/local/Microservice/killPid.log|awk '{print$2}'` >/dev/null 2>&1  
+                    fi
+                    let CurLine++					
+				done
+                PidFlag=0				
+				kill -9 $ServiceNamePid >/dev/null 2>&1						    
+			done
+			rm -rf /usr/local/Microservice/${ServiceAlias}/${ServiceAlias}.pid
+			echo -e "\n*** ${ServiceAlias} 已经停止... ***"
+			echo -e "\n"
+	    fi
+	fi	 	 
+}
+function Status(){
+     if [ "${ServiceAlias}" == "all" ] ;then
+		   ServiceNameList=`grep "^configService" $0|cut -d , -f 2`
+		   for ServiceName in $ServiceNameList
+		   do
+		          ServiceKey=`grep "^configService,${ServiceName}," $0|cut -d , -f 3`
+		          PID=`ps -ef|grep -w "${ServiceKey}"|grep -v grep|awk '{if($3 == 1) print$2}'|head -n 1`
+				  if [ -z "${PID}" ];then
+				        echo -e "\n*** ${ServiceName} 没有运行... ***"
+						echo -e "\n"
+				  else
+				       echo -e "\n*** ${ServiceName} 正在运行... [PID] = ${PID} ***"
+					   ps -p $PID -o pcpu,pmem
+					   echo -e "\n"
+				  fi
+		  done
+	else
+	     ServiceKey=`grep "^configService,${ServiceAlias}," $0|cut -d , -f 3`
+	     PID=`ps -ef|grep -w "${ServiceKey}"|grep -v grep|awk '{if($3 == 1) print$2}'|head -n 1`
+	     if [ -z "${PID}" ];then
+		     echo -e "\n*** ${ServiceAlias} 没有运行... ***"
+			 echo -e "\n"
+	   else
+		    echo -e "\n*** ${ServiceAlias} 正在运行... [PID] = ${PID} ***"
+			ps -p ${PID} -o pcpu,pmem
+		    echo -e "\n" 
+		fi
+	fi	 	  	 
+}
+scriptName=`basename $0`
+if [ `cat /etc/crontab|grep "${scriptName}"|wc -l` -eq 0 ]; then
+    echo "*/5  *  *  *  * root /usr/local/bin/`basename $0` all start" >>/etc/crontab
+	service crond restart
+fi
+if [ $# -ne 2 ];then
+   echo -e "\n*** 使用方式：\"`basename $0` ServiceName operateType\""
+   Servicelist=(`grep "^configService" $0|cut -d , -f 2`)
+   echo -e "\n*** 可使用的服务名是：ServiceName= ${Servicelist[*]} all"
+   echo -e "\n*** 可用的操作类型是：operateType= start stop restart status"
+   echo -e "\n*** 使用范例： \"`basename $0` ${Servicelist[0]} start\""
+   echo  -e "\n"
+   exit 0
+fi
+CheckConfigFormat
+case $1 in
+  all)
+     ServiceAlias="all"   
+  ;;
+{% for app in springboot_applications %}
+  "{{ app.app_short_name }}")
+     ServiceAlias="{{ app.app_long_name }}"
+  ;;
+{% endfor %}
+  *)
+     echo -e "\n*** 您输入的服务名有误 ****"
+	 Servicelist=(`grep "^configService" $0|cut -d , -f 2`)
+	 echo "可使用的服务名是： ${Servicelist[*]} all"
+	 echo -e "\n"
+	 exit 0
+  ;;
+esac
+case $2 in
+    start)
+	    Start
+		getProgramPid
+    ;;	  
+	 stop)
+	    Stop
+    ;;  
+    restart)
+        Stop
+        Start
+		getProgramPid
+    ;;		
+    status)
+	    Status
+    ;;
+	*)
+	   echo -e "\n*** 输入的第二个参数需是：Start或start或restart或status ***"
+	   echo -e "\n"
+	   exit 0
+esac

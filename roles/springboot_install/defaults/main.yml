@@ -1,9 +1,24 @@
 ---
 # Install java by default. Optional
-springboot_java_install: false
+springboot_java_install: true
+springboot_java_home: /usr/lib/jvm/jre-openjdk # /usr/lib/jvm/jre-openjdk, if springboot_java_install == true
 
-springboot_applications:
-  - { deploy_folder: '/opt/record', src_file: '/root/softwares/application/Record-1.0.0-SNAPSHOT.jar', application_name: 'Record-1.0.0-SNAPSHOT.jar', configuration_template: false, startup: 'startup.sh' }
+
+springboot_applications: # 有多少个服务加多少 application
+  - app_short_name: 'Record'
+    app_long_name: 'Record-1.0.0-SNAPSHOT'
+    deploy_folder: '/glzt/record'
+    app_bin: 'Record-1.0.0-SNAPSHOT.jar' 
+    src_file: '/root/softwares/application/Record-1.0.0-SNAPSHOT.jar'
+    configuration_template: false
+    startup: 'startup.sh'
+    jvm_opt: "" # 指定 JVM 参数
 
 springboot_group: springboot
 springboot_user: springboot
+
+springboot_nacos: 
+  url: "" # 指定 Nacos 地址，默认为：localhost:8848
+  namespace: "" # 指定 命名空间，默认为：public
+  user: "" # 指定 用户名，默认为：nacos
+  password: "" # 指定 密码，默认为：nacos
