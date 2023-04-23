@@ -5,20 +5,28 @@ springboot_java_home: /usr/lib/jvm/jre-openjdk # /usr/lib/jvm/jre-openjdk, if sp
 
 
 springboot_applications: # 有多少个服务加多少 application
-  - app_short_name: 'Record'
-    app_long_name: 'Record-1.0.0-SNAPSHOT'
-    deploy_folder: '/glzt/record'
-    app_bin: 'Record-1.0.0-SNAPSHOT.jar' 
-    src_file: '/root/softwares/application/Record-1.0.0-SNAPSHOT.jar'
-    configuration_template: false
-    startup: 'startup.sh'
-    jvm_opt: "" # 指定 JVM 参数
+- app_short_name: 'AdminService'
+  app_long_name: 'AdminService'
+  deploy_folder: '/glzt/PatientService/AdminService'
+  app_bin: 'AdminService.jar' 
+  src_file: '/root/softwares/application/AdminService.jar'
+  configuration_template: false
+  startup: 'demo.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'PortalService'
+  app_long_name: 'PortalService'
+  deploy_folder: '/glzt/PatientService/PortalService'
+  app_bin: 'PortalService.jar' 
+  src_file: '/root/softwares/application/PortalService.jar'
+  configuration_template: false
+  startup: 'demo.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
 
 springboot_group: springboot
 springboot_user: springboot
 
 springboot_nacos: 
-  url: "" # 指定 Nacos 地址，默认为：localhost:8848
-  namespace: "" # 指定 命名空间，默认为：public
-  user: "" # 指定 用户名，默认为：nacos
-  password: "" # 指定 密码，默认为：nacos
+  url: "localhost:8848" # 指定 Nacos 地址，默认为：localhost:8848
+  namespace: "GoBroad" # 指定 命名空间，默认为：public
+  user: "nacos" # 指定 用户名，默认为：nacos
+  password: "nacos" # 指定 密码，默认为：nacos

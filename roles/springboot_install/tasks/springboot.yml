@@ -40,23 +40,23 @@
     NACOS_NS={{ springboot_nacos.namespace | default('public', boolean=true) }}
     NACOS_USER={{ springboot_nacos.user | default('nacos', boolean=true)}}
     NACOS_PWD={{ springboot_nacos.password | default('nacos', boolean=true) }}
-    NACOS_OPT="-Dspring.cloud.nacos.config.server-addr=\$NACOS_URL -Dspring.cloud.nacos.discovery.server-addr=\$NACOS_URL -Dspring.cloud.nacos.config.namespace=\$NACOS_NS -Dspring.cloud.nacos.discovery.namespace=\$NACOS_NS -Dspring.cloud.nacos.config.username=\$NACOS_USER -Dspring.cloud.nacos.config.password=\$NACOS_PWD -Dspring.cloud.nacos.discovery.username=\$NACOS_USER -Dspring.cloud.nacos.discovery.password=\$NACOS_PWD
-    JVM_OPT={{ item.jvm_opt }}
-    nohup java -jar \$NACOS_OPT \$JVM_OPT {{item.deploy_folder}}/{{item.app_bin}} > /dev/null 2>&1 &
+    NACOS_OPT="-Dspring.cloud.nacos.config.server-addr=\$NACOS_URL -Dspring.cloud.nacos.discovery.server-addr=\$NACOS_URL -Dspring.cloud.nacos.config.namespace=\$NACOS_NS -Dspring.cloud.nacos.discovery.namespace=\$NACOS_NS -Dspring.cloud.nacos.config.username=\$NACOS_USER -Dspring.cloud.nacos.config.password=\$NACOS_PWD -Dspring.cloud.nacos.discovery.username=\$NACOS_USER -Dspring.cloud.nacos.discovery.password=\$NACOS_PWD"
+    JVM_OPT="{{ item.jvm_opt }}"
+    nohup java \$NACOS_OPT \$JVM_OPT -jar {{item.deploy_folder}}/{{item.app_bin}} > /dev/null 2>&1 &
     EOF
   loop: "{{ springboot_applications }}"
   # notify:
   #   - "Restart application"
 
-- name: "Springboot - Start App"
-  command: bash "{{ item.deploy_folder }}/{{ item.startup }}"
-  loop: "{{ springboot_applications }}"
+# - name: "Springboot - Start App"
+#   command: bash "{{ item.deploy_folder }}/{{ item.startup }}"
+#   loop: "{{ springboot_applications }}"
 
 - name: "Springboot - Auto-startup App - appctl"
   template:
     src: appctl.j2
     dest: /usr/local/bin/appctl
-    mode: 0644
+    mode: 0755
 
 - name: Springboot - Creates a cron file under /etc/cron.d
   ansible.builtin.cron:
@@ -65,6 +65,13 @@
     user: root
     job: "/usr/local/bin/appctl all start"
     cron_file: ansible_appctl-autostart
+
+- name: Springboot - Restart Cron service
+  ansible.builtin.systemd:
+    enabled: true
+    state: restarted
+    daemon_reload: true
+    name: crond
 
 # - name: Install EPEL Repo
 #   when:

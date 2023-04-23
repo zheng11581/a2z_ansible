@@ -1,6 +1,6 @@
 ---
  - name: Install Application - application
-   hosts: "{{ hostgroup | default('springboot') }}"
+   hosts: "{{ hostgroup | default('backend') }}"
    become: true
    any_errors_fatal: true
    remote_user: root

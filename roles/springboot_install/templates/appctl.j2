@@ -3,11 +3,11 @@ source /etc/profile
 export JAVA_HOME={{ springboot_java_home }}
 export CLASS_PATH=$JAVA_HOME/lib:$JAVA_HOME/jre/lib:$JAVA_HOME/lib/tools.jar:$CLASS_PATH
 export PATH=$JAVA_HOME/bin:$PATH
-export NACOS_URL=http://{{ springboot_nacos }}
+export NACOS_URL=http://{{ springboot_nacos.url }}
 function Config(){
 #配置服务标识,服务别名,服务筛选关键字,服务启动路径
 {% for app in springboot_applications %}
-configService,"{{ app.app_short_name }}","{{ app.app_long_name }}",cd {{ app.deploy_folder }} && bash {{ app.deploy_folder }}/{{ app.startup }} &
+configService,{{ app.app_short_name }},{{ app.app_long_name }},cd {{ app.deploy_folder }} && bash {{ app.deploy_folder }}/{{ app.startup }} &
 {% endfor %}
 }
 function Prestart() {
@@ -314,8 +314,8 @@ case $1 in
      ServiceAlias="all"   
   ;;
 {% for app in springboot_applications %}
-  "{{ app.app_short_name }}")
-     ServiceAlias="{{ app.app_long_name }}"
+  {{ app.app_short_name }})
+     ServiceAlias={{ app.app_long_name }}
   ;;
 {% endfor %}
   *)
