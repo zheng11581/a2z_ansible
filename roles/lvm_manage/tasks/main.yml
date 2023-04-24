@@ -1,0 +1,25 @@
+---
+- name: FileSystem - Create New VolumeMountPoint
+  block:
+  - name: vgcreate or vgextend
+    community.general.lvg:
+      vg: "{{ vg_name }}"
+      pvs: "{{ pvs_list }}"
+  - name: lvcreate or lvextend
+    community.general.lvol:
+      vg: "{{ vg_name }}"
+      lv: "{{ lv_name }}"
+      size: 100%PVS
+      resizefs: true
+  - name: FileSystem create
+    community.general.filesystem:
+      fstype: "{{ mount_point.fstype }}"
+      dev: "{{ mount_point.src }}"
+  - name: FileSystem mount
+    ansible.posix.mount:
+      path: "{{ mount_point.path }}"
+      src: "{{ mount_point.src }}"
+      fstype: "{{ mount_point.fstype }}"
+      state: mounted  
+
+
