@@ -8,31 +8,31 @@
   roles:
   - lvm_manage
 
-# - name: Install MySQL Single Instance
-#   hosts: "{{ hostgroup | default('mysql') }}"
-#   become: true
-#   any_errors_fatal: true
-#   remote_user: root
-#   become_user: root
-#   roles:
-#   - mysql_install
+- name: Install MySQL Single Instance
+  hosts: "{{ hostgroup | default('mysql') }}"
+  become: true
+  any_errors_fatal: true
+  remote_user: root
+  become_user: root
+  roles:
+  - mysql_install
 
-# - name: Install Application - nginx redis nacos
-#   hosts: "{{ hostgroup | default('middleware') }}"
-#   become: true
-#   any_errors_fatal: true
-#   remote_user: root
-#   become_user: root
-#   roles:
-#   - nginx_install
-#   - redis_install
-#   - nacos_install
+- name: Install Application - nginx redis nacos
+  hosts: "{{ hostgroup | default('middleware') }}"
+  become: true
+  any_errors_fatal: true
+  remote_user: root
+  become_user: root
+  roles:
+  - nginx_install
+  - redis_install
+  - nacos_install
 
-# - name: Install Application - application
-#   hosts: "{{ hostgroup | default('backend') }}"
-#   become: true
-#   any_errors_fatal: true
-#   remote_user: root
-#   become_user: root
-#   roles:
-#   - springboot_install
+- name: Install Application - application
+  hosts: "{{ hostgroup | default('backend') }}"
+  become: true
+  any_errors_fatal: true
+  remote_user: root
+  become_user: root
+  roles:
+  - springboot_install
