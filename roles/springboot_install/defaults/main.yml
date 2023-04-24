@@ -3,7 +3,18 @@
 springboot_java_install: true
 springboot_java_home: /usr/lib/jvm/jre-openjdk # /usr/lib/jvm/jre-openjdk, if springboot_java_install == true
 
+# User and Group
+springboot_group: springboot
+springboot_user: springboot
 
+# Nacos
+springboot_nacos: 
+  url: "localhost:8848" # 指定 Nacos 地址，默认为：localhost:8848
+  namespace: "GoBroad" # 指定 命名空间，默认为：public
+  user: "nacos" # 指定 用户名，默认为：nacos
+  password: "nacos" # 指定 密码，默认为：nacos
+
+# Backends
 springboot_applications: # 有多少个服务加多少 application
 - app_short_name: 'AdminService'
   app_long_name: 'AdminService'
@@ -11,7 +22,7 @@ springboot_applications: # 有多少个服务加多少 application
   app_bin: 'AdminService.jar' 
   src_file: '/root/softwares/application/AdminService.jar'
   configuration_template: false
-  startup: 'demo.sh'
+  startup: 'startup.sh'
   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
 - app_short_name: 'PortalService'
   app_long_name: 'PortalService'
@@ -19,14 +30,134 @@ springboot_applications: # 有多少个服务加多少 application
   app_bin: 'PortalService.jar' 
   src_file: '/root/softwares/application/PortalService.jar'
   configuration_template: false
-  startup: 'demo.sh'
+  startup: 'startup.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'GatewayService'
+  app_long_name: 'GatewayService'
+  deploy_folder: '/glzt/PatientService/GatewayService'
+  app_bin: 'GatewayService.jar' 
+  src_file: '/root/softwares/application/GatewayService.jar'
+  configuration_template: false
+  startup: 'startup.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'CaAgentService'
+  app_long_name: 'CaAgentService'
+  deploy_folder: '/glzt/PatientService/CaAgentService'
+  app_bin: 'CaAgentService.jar' 
+  src_file: '/root/softwares/application/CaAgentService.jar'
+  configuration_template: false
+  startup: 'startup.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'DoctorService'
+  app_long_name: 'DoctorService'
+  deploy_folder: '/glzt/PatientService/DoctorService'
+  app_bin: 'DoctorService.jar' 
+  src_file: '/root/softwares/application/DoctorService.jar'
+  configuration_template: false
+  startup: 'startup.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'JobExecutor'
+  app_long_name: 'JobExecutor'
+  deploy_folder: '/glzt/PatientService/JobExecutor'
+  app_bin: 'JobExecutor.jar' 
+  src_file: '/root/softwares/application/JobExecutor.jar'
+  configuration_template: false
+  startup: 'startup.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'MAppointReg'
+  app_long_name: 'MAppointReg'
+  deploy_folder: '/glzt/PatientService/MAppointReg'
+  app_bin: 'MAppointReg.jar' 
+  src_file: '/root/softwares/application/MAppointReg.jar'
+  configuration_template: false
+  startup: 'startup.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'PrintManage'
+  app_long_name: 'PrintManage'
+  deploy_folder: '/glzt/PatientService/PrintManage'
+  app_bin: 'PrintManage.jar' 
+  src_file: '/root/softwares/application/PrintManage.jar'
+  configuration_template: false
+  startup: 'startup.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'SpringbootAdmin'
+  app_long_name: 'SpringbootAdmin'
+  deploy_folder: '/glzt/PatientService/SpringbootAdmin'
+  app_bin: 'SpringbootAdmin.jar' 
+  src_file: '/root/softwares/application/SpringbootAdmin.jar'
+  configuration_template: false
+  startup: 'startup.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'Chat'
+  app_long_name: 'Chat'
+  deploy_folder: '/glzt/PatientService/Chat'
+  app_bin: 'Chat.jar' 
+  src_file: '/root/softwares/application/Chat.jar'
+  configuration_template: false
+  startup: 'startup.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'CRFManager'
+  app_long_name: 'CRFManager'
+  deploy_folder: '/glzt/PatientService/CustomForm'
+  app_bin: 'CRFManager.jar' 
+  src_file: '/root/softwares/application/CRFManager.jar'
+  configuration_template: false
+  startup: 'startup.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'gaobopayment'
+  app_long_name: 'gaobopayment'
+  deploy_folder: '/glzt/PatientService/gaobopayment'
+  app_bin: 'gaobopayment.jar' 
+  src_file: '/root/softwares/application/gaobopayment.jar'
+  configuration_template: false
+  startup: 'startup.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'HisAdapterService'
+  app_long_name: 'HisAdapterService'
+  deploy_folder: '/glzt/PatientService/HisAdapterService'
+  app_bin: 'HisAdapterService.jar' 
+  src_file: '/root/softwares/application/HisAdapterService.jar'
+  configuration_template: false
+  startup: 'startup.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'JobAdmin'
+  app_long_name: 'JobAdmin'
+  deploy_folder: '/glzt/PatientService/JobAdmin'
+  app_bin: 'JobAdmin.jar' 
+  src_file: '/root/softwares/application/JobAdmin.jar'
+  configuration_template: false
+  startup: 'startup.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'MDTService'
+  app_long_name: 'MDTService'
+  deploy_folder: '/glzt/PatientService/MDTService'
+  app_bin: 'MDTService.jar' 
+  src_file: '/root/softwares/application/MDTService.jar'
+  configuration_template: false
+  startup: 'startup.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'Task'
+  app_long_name: 'Task'
+  deploy_folder: '/glzt/PatientService/TaskService'
+  app_bin: 'Task.jar' 
+  src_file: '/root/softwares/application/Task.jar'
+  configuration_template: false
+  startup: 'startup.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'usermanage'
+  app_long_name: 'usermanage-1.0.0-SNAPSHOT'
+  deploy_folder: '/glzt/PatientService/UserManage'
+  app_bin: 'usermanage-1.0.0-SNAPSHOT.jar' 
+  src_file: '/root/softwares/application/usermanage-1.0.0-SNAPSHOT.jar'
+  configuration_template: false
+  startup: 'startup.sh'
+  jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+- app_short_name: 'UserService'
+  app_long_name: 'UserService'
+  deploy_folder: '/glzt/PatientService/UserService'
+  app_bin: 'UserService' 
+  src_file: '/root/softwares/application/UserService.jar'
+  configuration_template: false
+  startup: 'startup.sh'
   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
 
-springboot_group: springboot
-springboot_user: springboot
-
-springboot_nacos: 
-  url: "localhost:8848" # 指定 Nacos 地址，默认为：localhost:8848
-  namespace: "GoBroad" # 指定 命名空间，默认为：public
-  user: "nacos" # 指定 用户名，默认为：nacos
-  password: "nacos" # 指定 密码，默认为：nacos
