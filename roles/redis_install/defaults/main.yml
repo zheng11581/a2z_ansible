@@ -1,6 +1,6 @@
 ---
 ## Installation options
-redis_version: 5.0.0
+redis_version: 5.0.14
 redis_install_dir: /glzt/redis
 redis_install_from_source: true
 redis_dir: /glzt/redis/{{ redis_port }}
@@ -11,7 +11,7 @@ redis_protected_mode: "no"
 # Set this to true to validate redis tarball checksum against vars/main.yml
 redis_verify_checksum: false
 # Set this value to a local path of a tarball to use for installation instead of downloading
-redis_tarball: "/root/softwares/redis/redis-{{ redis_version }}.tar.gz"
+redis_tarball: "/root/softwares/middleware/redis-{{ redis_version }}.tar.gz"
 # Set this to true to build 32-bit binaries of Redis
 redis_make_32bit: false
 # Set this to true to build redis with TLS support, available only for versions >= 6 (require OpenSSL development libraries)

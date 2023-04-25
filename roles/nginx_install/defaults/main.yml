@@ -1,4 +1,4 @@
-packages_dir: /root/softwares/nginx
+packages_dir: /root/softwares/middleware
 nginx_package: nginx-1.23.4
 common_packages:
   "{% if ansible_distribution_major_version | int == 6 %}{{ common_packages_el6 }}\
