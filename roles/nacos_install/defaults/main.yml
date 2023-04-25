@@ -1,8 +1,9 @@
-packages_dir: /root/softwares/nacos
+packages_dir: /root/softwares/middleware
 java_install: true
 java_package: 
   - java-11-openjdk.x86_64
   - java-11-openjdk-devel.x86_64
 java_from_local: false
-nacos_package: nacos-server-2.1.2.zip
-nacos_home: /opt
+nacos_package: nacos-server-2.0.2.zip
+nacos_basedir: /glzt
+nacos_home: "{{ nacos_basedir }}/nacos"

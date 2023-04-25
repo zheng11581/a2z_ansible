@@ -39,13 +39,16 @@
 #     group: root
 #     mode: u=rwx,g=r,o=r
 
-- name: Install Nginx - Just force systemd to reread configs
+- name: Install Nginx - Start and Enable Nginx and Just force systemd to reread configs
   ansible.builtin.systemd:
-    daemon_reload: yes
-
-- name: Install Nginx - Start and Enable Nginx
-  ansible.builtin.service:
     name: nginx
     state: started
     enabled: yes
+    daemon_reload: yes
+
+# - name: Install Nginx - Start and Enable Nginx
+#   ansible.builtin.service:
+#     name: nginx
+#     state: started
+#     enabled: yes
 

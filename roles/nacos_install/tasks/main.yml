@@ -14,8 +14,31 @@
 - name: Install Nacos - unzip Nacos zip
   ansible.builtin.unarchive:
     src: "{{packages_dir}}/{{nacos_package}}"
-    dest: "{{nacos_home}}/"
+    dest: "{{nacos_basedir}}/"
     #remote_src: yes
 
-- name: Install Nacos - Start Nacos
-  ansible.builtin.command: sh {{nacos_home}}/nacos/bin/startup.sh -m standalone
+# - name: Install Nacos - Start Nacos
+#   ansible.builtin.command: sh {{nacos_home}}/bin/startup.sh -m standalone
+
+- name: Install Nacos - Copy startup.sh
+  ansible.builtin.template:
+    src: startup.sh.j2
+    dest: "{{nacos_home}}/bin/startup.sh"
+    owner: root
+    group: root
+    mode: u=rwx,g=r,o=r
+
+- name: Install Nacos - Copy nacos.service
+  ansible.builtin.template:
+    src: nacos.service.j2
+    dest: /etc/systemd/system/nacos.service
+    owner: root
+    group: root
+    mode: u=rwx,g=r,o=r
+
+- name: Install Nacos - Start nacos and Onboot start
+  ansible.builtin.systemd:
+    name: nacos
+    state: started
+    enabled: yes
+    daemon_reload: yes
