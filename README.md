@@ -7,27 +7,34 @@
 
 - a2z_ansible 依赖 Ansible，所以需要在 Ansible controller（控制面）  上安装 Ansible 
 
+```shell
+# 以 Anolis 8.6 操作系统为例
+pip3 install -U pip setuptools
+python3 -m pip install --user ansible -i https://pypi.douban.com/simple
+export PATH=~/.local/bin:$PATH
+```
+
 
 ## 使用
 
-- 拷贝公钥到待安装的主机上
+- 1. 修改本机上的 /etc/hosts
+
+```shell
+# vi /etc/hosts
+192.168.3.215   mysql57.db # mysql 对应的主机
+192.168.3.216   app.mw # nginx redis nacos 对应的主机
+192.168.3.217   app.back # springboot 对应的主机
+```
+
+- 2. 拷贝公钥到待安装的主机上
 
 ```shell
 ssh-copy-id -i ~/.ssh/id_rsa.pub <host>
 ```
 
-- 修改 Ansible controller 主机上的 /etc/hosts
+- 3. 安装 mysql 单节点
 
-```shell
-# vi /etc/hosts
-192.168.3.215   mysql57.db # mysql 对应的主机
-192.168.3.216   app.gw # nginx redis nacos 对应的主机
-192.168.3.217   app.backend # springboot 对应的主机
-```
-
-- 安装 mysql 单节点
-
-    - 配置 MySQL 安装参数
+    - 修改配置 MySQL 安装参数（按照需要修改）
     
     修改 roles/mysql_install/defaults/main.yml 文件
     
@@ -44,7 +51,6 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub <host>
 
     # mysql 真正的 datadir 就会是 mysql_data_dir_base + mysql_port
     mysql_data_dir_base: /glzt/mysql/
-
     # mysql 端口
     mysql_port: 3306
 
@@ -56,14 +62,14 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub <host>
     - 执行 mysql 安装 playbook
 
     ```shell
-    export PATH=/root/.local/bin/:$PATH && ansible-playbook -e hostgroup=mysql -i inventory/hosts.yml install-mysql.yml
+    ansible-playbook -i inventory/hosts.yml install-mysql.yml
     ```
 
-- 安装 nacos redis nginx
+- 4. 安装 nacos redis nginx
 
-    - 配置安装参数
+    - 修改配置安装参数（按照需要修改）
 
-    roles/nacos_install/defaults/main.yml（安装包在本地）
+    Nacos配置文件修改：roles/nacos_install/defaults/main.yml
 
     ```shell
     # nacos 安装包在Ansible controller上所在的目录
@@ -79,14 +85,14 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub <host>
     - java-11-openjdk-devel.x86_64
     
     # nacos 安装目录
-    nacos_home: /glzt
+    nacos_home: /glzt/nacos
     ```
 
-    roles/redis_install/defaults/yml（安装包在网上）
+    Redis配置文件修改：roles/redis_install/defaults/yml
 
     ```shell
     # redis 版本
-    redis_version: 5.0.0
+    redis_version: 5.0.14
     # redis 安装目录
     redis_install_dir: /glzt/redis
     # redis 端口
@@ -94,42 +100,63 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub <host>
 
     ```
 
-    roles/nginx_install/defaults/yml（安装包在本地）
+    Nginx配置文件修改：roles/nginx_install/defaults/yml（安装包在本地）
 
     ```shell
     packages_dir: /root/softwares/nginx
-    nginx_package: nginx-1.23.3
+    nginx_package: nginx-1.23.4
 
     ```
 
     - 执行安装 playbook
 
     ```shell
-    export PATH=/root/.local/bin/:$PATH && ansible-playbook -e hostgroup=application -i inventory/hosts.yml install-application.yml
+    ansible-playbook -i inventory/hosts.yml install-application.yml
     ```
 
-- 安装 springboot 后端服务
+- 5. 安装 springboot 后端服务
 
     - 配置 安装参数
     
     修改 roles/springboot_install/defaults/main.yml 文件
     
     ```shell
-    # 是否需要安装 jdk
-    springboot_java_install: false
+    # Install java by default. Optional
+    springboot_java_install: true
+    springboot_java_home: /usr/lib/jvm/jre-openjdk # /usr/lib/jvm/jre-openjdk, if springboot_java_install == true
 
-    # 需要安装后端服务的信息
-    springboot_applications:
-    - { deploy_folder: '/opt/record', src_file: '/root/softwares/application/Record-1.0.0-SNAPSHOT.jar', application_name: 'Record-1.0.0-SNAPSHOT.jar', configuration_template: false, startup: 'startup.sh' }
+    # User and Group
     springboot_group: springboot
     springboot_user: springboot
 
+    # Nacos
+    springboot_nacos: 
+    url: "localhost:8848" # 指定 Nacos 地址，默认为：localhost:8848
+    namespace: "GoBroad" # 指定 命名空间，默认为：public
+    user: "nacos" # 指定 用户名，默认为：nacos
+    password: "nacos" # 指定 密码，默认为：nacos
+
+    # Backends
+    springboot_applications: 
+    - app_short_name: 'AdminService'
+      app_long_name: 'AdminService'
+      deploy_folder: '/glzt/PatientService/AdminService'
+      app_bin: 'AdminService.jar' 
+      src_file: '/root/softwares/application/AdminService.jar'
+      configuration_template: false
+      startup: 'startup.sh'
+      jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+    - # 有多少个服务加多少 application
+    - # 有多少个服务加多少 application
+    - # 有多少个服务加多少 application
+    ...
+    
     ```
 
     - 执行 springboot 安装 playbook
 
     ```shell
-    export PATH=/root/.local/bin/:$PATH && ansible-playbook -e hostgroup=springboot -i inventory/hosts.yml install-application.yml
+    ansible-playbook -i inventory/hosts.yml install-application.yml
     ```
 
 <!-- ```shell
