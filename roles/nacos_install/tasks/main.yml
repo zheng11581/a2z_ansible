@@ -28,6 +28,14 @@
     group: root
     mode: u=rwx,g=r,o=r
 
+- name: Install Nacos - Copy application.properties
+  ansible.builtin.template:
+    src: application.properties.j2
+    dest: "{{nacos_home}}/conf/application.properties"
+    owner: root
+    group: root
+    mode: u=rwx,g=r,o=r
+
 - name: Install Nacos - Copy nacos.service
   ansible.builtin.template:
     src: nacos.service.j2
@@ -36,9 +44,23 @@
     group: root
     mode: u=rwx,g=r,o=r
 
-- name: Install Nacos - Start nacos and Onboot start
+- name: Install Nacos - Start nacos and onboot start
   ansible.builtin.systemd:
     name: nacos
     state: started
     enabled: yes
     daemon_reload: yes
+
+# - name: Install Nacos - Load all dataid 
+#   block:
+#   - name: Login to nacos
+#     ansible.builtin.uri:
+#       url: http://
+#       method: POST
+#       body_format: form-urlencoded
+#       body:
+#         name: your_username
+#         password: your_password
+#         enter: Sign in
+#       status_code: 302
+#     register: login
