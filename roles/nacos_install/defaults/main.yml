@@ -9,7 +9,4 @@ nacos_basedir: /glzt
 nacos_home: "{{ nacos_basedir }}/nacos"
 nacos_props: 
   port: "8848" # 指定 Nacos 端口，默认为：8848
-  namespace: "GoBroad" # 指定 命名空间，默认为：public
-  user: "nacos" # 指定 用户名，默认为：nacos
-  password: "nacos" # 指定 密码，默认为：nacos
-  config: "nacos_config_export_20230426181529.zip"
+  derby_data: "derby-data.tar.gz" # 指定 Nacos 内置数据库默认配置数据
