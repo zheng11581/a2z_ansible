@@ -1,7 +1,9 @@
 # a2z_ansible
 
 ## 功能
-安装各种中间件、数据库、微服务组件
+安装、配置各种中间件、数据库、微服务组件
+
+![OverView](./docs/overview.jpg)
 
 ## 安装
 
