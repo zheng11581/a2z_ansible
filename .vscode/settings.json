@@ -1,4 +1,5 @@
 {
     "json.schemaDownload.enable": true,
-    "yaml.schemaStore.enable": true
+    "yaml.schemaStore.enable": true,
+    "ansible.validation.lint.enabled": false
 }
