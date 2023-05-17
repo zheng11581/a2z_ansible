@@ -1,6 +1,6 @@
 ---
 vg_name: glzt
-pvs_list: /dev/sdb,/dev/sdc # If, for example, we already have VG vg.services on top of /dev/sdb, this VG will be extended by /dev/sdc.
+pvs_list: /dev/sdb # If, for example, we already have VG vg.services on top of /dev/sdb, this VG will be extended by /dev/sdc.
 lv_name: data
 mount_point: 
   src: /dev/{{ vg_name }}/{{ lv_name }}

@@ -1,0 +1,12 @@
+- name: Transfer databse sql statement to remote
+  when: import_data_struct == 1
+  ansible.builtin.copy:
+    src: "{{ packages_dir }}/database.sql"
+    dest: /tmp/import_database.sql
+    owner: "{{ mysql_user }}"
+    group: "{{ mysql_group }}"
+    mode: u=rwx,g=rx,o=rx
+
+- name: Import database
+  when: import_data_struct == 1
+  ansible.builtin.shell: "{{ mysql_base_dir }}/bin/mysql -hlocalhost -uroot -S /tmp/mysql.sock < /tmp/import_database.sql"

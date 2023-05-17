@@ -19,3 +19,6 @@
 
 - name: make mysql secure
   ansible.builtin.include_tasks: make_mysql_security.yml
+
+- name: import database
+  ansible.builtin.include_tasks: import_data_struct.yml

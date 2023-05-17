@@ -161,6 +161,20 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub <host>
     ansible-playbook -i inventory/hosts.yml install-application.yml
     ```
 
+- 6. All-in-one 一次性安装所有的东西
+
+  - 配置 安装参数，参考 3、4、5修改 
+    roles/springboot_install/defaults/main.yml
+    roles/nginx_install/defaults/main.yml
+    roles/redis_install/defaults/main.yml
+    roles/nacos_install/defaults/main.yml
+    roles/mysql_install/defaults/main.yml
+
+  - 执行 springboot 安装 playbook
+    ```shell
+    ansible-playbook -i inventory/hosts.yml install-allinone.yml
+    ```
+
 <!-- ```shell
 export ANSIBLE_LIBRARY=`pwd`/plugins/modules && ansible-playbook -e hostgroup=oracle -i inventory/hosts.yml single-oracle.yml
 ``` -->

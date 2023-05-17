@@ -42,10 +42,10 @@ nginx_www: "{{ nginx_home }}/html"
 
 # nginx 配置文件相关
 # C端
-domain_name: 192.168.3.216
-ssl_cert: demo.pem
-ssl_key: demo.key
-api_proxy: http://xxxx:8082/
+domain_name: xxxx # 修改成指定域名
+ssl_cert: "{{domain_name}}.pem" # 申请的 SSL 证书
+ssl_key: "{{domain_name}}.key" # 申请的 SSL 证书私钥
+api_proxy: http://xxxx:8082/ # 机构前置机代理
 
 
 
