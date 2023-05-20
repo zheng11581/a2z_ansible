@@ -6,3 +6,7 @@ mount_point:
   src: /dev/{{ vg_name }}/{{ lv_name }}
   path: /glzt/
   fstype: xfs
+configure_local_repo: 
+  enabled: true
+  packages_dir: /root/softwares/iso/
+  os_iso: AnolisOS-8.6-x86_64-dvd.iso

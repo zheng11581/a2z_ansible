@@ -1,0 +1,42 @@
+---
+# - name: Local YUM Repository - Copy ISO image to remote
+#   ansible.builtin.copy:
+#     src: "{{ configure_local_repo.packages_dir }}/{{ configure_local_repo.os_iso }}"
+#     dest: /mnt/{{ configure_local_repo.os_iso }}
+#     owner: root
+#     group: root
+#     mode: u=rwx,g=rx,o=rx  
+- name: Local YUM Repository - Mount ISO image on /mnt/iso
+  ansible.posix.mount:
+    path: /mnt/iso
+    fstype: iso9660
+    src: "/mnt/{{ configure_local_repo.os_iso }}"
+    opts: loop
+    state: mounted
+- name: Local YUM Repository - Backup other repository (1)
+  ansible.builtin.template:
+    src: repo_backup.sh.j2
+    dest: /tmp/repo_backup.sh
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+- name: Local YUM Repository - Backup other repository (2)
+  ansible.builtin.shell: 
+    cmd: bash /tmp/repo_backup.sh
+- name: Local YUM Repository - Clean metadata
+  ansible.builtin.command: yum clean metadata
+- name: Local YUM Repository - Add local repository file (1)
+  ansible.builtin.yum_repository:
+    name: BaseOS
+    description: Local YUM repo - BaseOS
+    file: local
+    baseurl: file:///mnt/iso/BaseOS
+    gpgcheck: no
+- name: Local YUM Repository - Add local repository file (2)
+  ansible.builtin.yum_repository:
+    name: AppStream
+    description: Local YUM repo - AppStream
+    file: local
+    baseurl: file:///mnt/iso/AppStream
+    gpgcheck: no
+  

@@ -20,6 +20,13 @@
       path: "{{ mount_point.path }}"
       src: "{{ mount_point.src }}"
       fstype: "{{ mount_point.fstype }}"
-      state: mounted  
+      state: mounted
+- name: FileSystem - Local YUM Repository Setup
+  ansible.builtin.include_tasks: local_yum_repo_setup.yml
+  when: (ansible_os_family == 'RedHat' or ansible_os_family == 'Anolis' or ansible_os_family == 'CentOS') and configure_local_repo.enabled
+- name: Debug
+  ansible.builtin.debug: 
+    msg: "{{ ansible_os_family }}"
+
 
 

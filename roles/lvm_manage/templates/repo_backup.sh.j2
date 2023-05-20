@@ -1,0 +1,9 @@
+#! /bin/bash
+if [ ! -e /etc/yum.repos.d/backup ]; then
+  mkdir /etc/yum.repos.d/backup 
+fi
+repo_num=$(ls -l /etc/yum.repos.d/ |egrep "*.repo" -c)
+if [ $repo_num -gt 0 ]; then
+  mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/backup/
+fi
+
