@@ -1,0 +1,428 @@
+#!/bin/bash
+echo "2.1.1-开始修复口令锁定策略..."
+cp -pf /etc/pam.d/system-auth /etc/pam.d/system-auth_bak
+if ([ -f /etc/redhat-release ] && [ -f /etc/pam.d/system-auth ]);then 
+    FILE=/etc/pam.d/system-auth
+    result_count=`cat $FILE |sed '/^#/d'|sed '/^$/d'|egrep -i "auth[[:space:]]*required[[:space:]]*pam_tally.so|auth[[:space:]]*required[[:space:]]*pam_tally2.so" |wc -l`
+    result=`cat $FILE |sed '/^#/d'|sed '/^$/d'|egrep -i "auth[[:space:]]*required[[:space:]]*pam_tally.so|auth[[:space:]]*required[[:space:]]*pam_tally2.so"`
+    if [ $result_count -eq 0 ]; then
+        sed -i '$a\auth required pam_tally2.so deny=5 onerr=fail no_magic_root unlock_time=180' $FILE
+    else
+        sed -i 's#$result#auth required pam_tally2.so deny=5 onerr=fail no_magic_root unlock_time=180#g' $FILE
+    fi
+    unset result_count result
+    result_count=`cat $FILE |sed '/^#/d'|sed '/^$/d'|egrep -i "account[[:space:]]*required[[:space:]]*pam_tally.so|account[[:space:]]*required[[:space:]]*pam_tally2.so" |wc -l`
+    result=`cat $FILE |sed '/^#/d'|sed '/^$/d'|egrep -i "account[[:space:]]*required[[:space:]]*pam_tally.so|account[[:space:]]*required[[:space:]]*pam_tally2.so"`
+    
+    if [ $result_count -eq 0 ]; then
+        sed -i '$a\account  required  pam_tally2.so' $FILE
+    else
+        sed -i "s#$result#account  required  pam_tally2.so#g" $FILE
+    fi
+fi
+echo -e "完成\n"
+unset result FILE
+
+echo "2.1.2-开始修复口令生存期..."
+
+cat /etc/login.defs |egrep -v "^[[:space:]]*#"|egrep '^\s*PASS_MAX_DAYS|^\s*PASS_MIN_DAYS|^\s*PASS_WARN_AGE'
+
+cp -p /etc/login.defs /etc/login.defs_bak
+sed -i 's#PASS_MAX_DAYS.\+[0-9]\+#PASS_MAX_DAYS 90#g' /etc/login.defs
+sed -i 's#PASS_MIN_DAYS.\+[0-9]\+#PASS_MIN_DAYS 10#g' /etc/login.defs
+sed -i 's#PASS_WARN_AGE.\+[0-9]\+#PASS_WARN_AGE 7#g' /etc/login.defs
+echo -e "完成\n"
+
+echo "2.1.3-口令复杂度..."
+Calculate ()
+{
+DCREDIT=`cat $FILE|egrep -v "^#|^$"|grep -w "dcredit"|sed 's/^.*dcredit=//g'|sed 's/\s.*$//g'`;
+LCREDIT=`cat $FILE|egrep -v "^#|^$"|grep -w "lcredit"|sed 's/^.*lcredit=//g'|sed 's/\s.*$//g'`;
+UCREDIT=`cat $FILE|egrep -v "^#|^$"|grep -w "ucredit"|sed 's/^.*ucredit=//g'|sed 's/\s.*$//g'`;
+OCREDIT=`cat $FILE|egrep -v "^#|^$"|grep -w "ocredit"|sed 's/^.*ocredit=//g'|sed 's/\s.*$//g'`;
+MINLEN=`cat $FILE|egrep -v "^#|^$"|grep "minlen"|sed 's/^.*minlen=//g'|sed 's/\s.*$//g'`;
+echo "DCREDIT=$DCREDIT";
+echo "LCREDIT=$LCREDIT";
+echo "UCREDIT=$UCREDIT";
+echo "OCREDIT=$OCREDIT";
+echo "MINCLASS=$MINLEN";
+unset DCREDIT LCREDIT UCREDIT OCREDIT MINLEN;
+}
+if ([ -f /etc/redhat-release ] && [ -f /etc/pam.d/system-auth ]);then
+    FILE=/etc/pam.d/system-auth;
+    Calculate;
+fi
+
+result_count=`cat $FILE |sed '/^#/d'|sed '/^$/d'|grep -E "^password\s*requisite\s*pam_cracklib.so" |wc -l`
+result=`cat $FILE |sed '/^#/d'|sed '/^$/d'|grep -E "^password\s*requisite\s*pam_cracklib.so"`
+if [ $result_count -eq 0 ]; then
+    sed -i '$a\password requisite pam_cracklib.so try_first_pass retry=3 dcredit=-1 lcredit=-1 ucredit=-1 ocredit=-1 minlen=8' $FILE
+else
+    sed -i "s#$result#password requisite pam_cracklib.so try_first_pass retry=3 dcredit=-1 lcredit=-1 ucredit=-1 ocredit=-1 minlen=8#g" $FILE
+fi
+unset FILE result result_count
+echo -e "完成\n"
+
+echo "2.1.4-删除无关帐号..."
+
+result_pw=`cat /etc/shadow|sed '/^\s*#/d'|awk -F: '($2!~/^*/) && ($2!~/^!!/) {print $1}'|egrep "^lp:|^sync:|^halt:|^news:|^uucp:|^operator:|^games:|^gopher:|^smmsp:|^nfsnobody:|^nobody:"|wc -l`
+result_shell=`egrep "^lp:|^sync:|^halt:|^news:|^uucp:|^operator:|^games:|^gopher:|^smmsp:|^nfsnobody:|^nobody:" /etc/passwd|awk -F: '($7!~/bin\/false/) {print $1":"$7}'|wc -l`
+
+if [ $result_pw -ne 0 ]; then
+    cp -p /etc/shadow /etc/shadow_bak
+    result=`cat /etc/shadow|sed '/^\s*#/d'|awk -F: '($2!~/^*/) && ($2!~/^!!/) {print $1":"}'|egrep "^lp:|^sync:|^halt:|^news:|^uucp:|^operator:|^games:|^gopher:|^smmsp:|^nfsnobody:|^nobody:"`
+    for pw in $result; do
+       passwd -l $pw
+    done
+unset result result_pw $pw
+fi
+if [ $result_shell -ne 0 ]; then
+    cp -p /etc/passwd /etc/passwd_bak
+    result=`egrep "^lp:|^sync:|^halt:|^news:|^uucp:|^operator:|^games:|^gopher:|^smmsp:|^nfsnobody:|^nobody:" /etc/passwd|awk -F: '($7!~/bin\/false/) {print $1}'`
+    for ashell in $result; do
+        usermod -s /bin/false $ashell
+    done
+unset result result_shell ashell
+fi
+echo -e "完成\n"
+
+echo "2.1.5-设置账户组..."
+UP_GIDMIN=`(grep -v ^# /etc/login.defs |grep "^GID_MIN"|awk '($1="GID_MIN") {print $2}')`
+UP_GIDMAX=`(grep -v ^# /etc/login.defs |grep "^GID_MAX"|awk '($1="GID_MAX") {print $2}')`
+result=`egrep -v "oracle|sybase|postgres" /etc/passwd|awk -F: '($4>='$UP_GIDMIN' && $4<='$UP_GIDMAX') {print $1":"$3":"$4}'|wc -l`
+unset UP_GIDMIN UP_GIDMAX
+if [ $result -eq 0 ]; then
+    cp -p /etc/group /etc/group_bak
+    groupadd glzt
+    useradd -g glzt glzt
+    echo 'Byrr@$2017$!' |passwd  --stdin glzt
+fi
+unset result
+echo -e "完成\n"
+
+echo "2.1.6禁止存在空密码的帐户..."
+cp -p /etc/passwd /etc/passwd_bak
+cp -p /etc/shadow /etc/shadow_bak
+result=`awk -F: '( $2 == "" ) { print $1 }' /etc/shadow |wc -l`
+if [ $result -ne 0 ]; then
+    for user in $result; do
+        echo 'Byrr@$2017$!' |passwd  --stdin $user
+        echo "$user 密码被修改"
+    done
+fi  
+unset result
+echo -e "完成\n"
+
+echo "2.1.7避免帐号共享..."
+up_uidmin=`(grep -v ^# /etc/login.defs |grep "^UID_MIN"|awk '($1="UID_MIN"){print $2}')`
+up_uidmax=`(grep -v ^# /etc/login.defs |grep "^UID_MAX"|awk '($1="UID_MAX"){print $2}')`
+result_user=`egrep -v "oracle|sybase|postgres" /etc/passwd|awk -F: '($3>='$up_uidmin' && $3<='$up_uidmax') {print $1}' |wc -l`
+if [ $result_user -gt 0 ]; then
+    result=`egrep -v "oracle|sybase|postgres" /etc/passwd|awk -F: '($3>='$up_uidmin' && $3<='$up_uidmax') {print $1}'`
+    for user in $result; do
+        echo 'Bryy@$2017$!' |passwd  --stdin $user
+        echo "$user 密码被修改"
+    done 
+else
+    echo "创建用户glzt"
+    useradd glzt
+    echo 'Bryy@$2017$!' |passwd  --stdin $user
+fi
+unset result result_user up_uidmin up_uidmax
+echo -e "完成\n"
+
+echo "2.1.8口令重复次数限制..."
+
+touch /etc/security/opasswd
+chown root:root /etc/security/opasswd
+chmod 600 /etc/security/opasswd
+
+
+if ([ -f /etc/redhat-release ] && [ -f /etc/pam.d/system-auth ]);then
+    FILE=/etc/pam.d/system-auth
+    result_cout=`cat $FILE |sed '/^#/d'|sed '/^$/d'|grep -E "^password\s+sufficient\s+pam_unix.so" |wc -l`
+    result=`cat $FILE |sed '/^#/d'|sed '/^$/d'|grep -E "^password\s+sufficient\s+pam_unix.so"`
+    if [ $result_cout -eq 0 ]; then
+        sed -i '$a\password sufficient pam_unix.so sha512 shadow nullok try_first_pass use_authtok remember=5' $FILE
+    else
+        sed -i "s#$result#password sufficient pam_unix.so sha512 shadow nullok try_first_pass use_authtok remember=5#" $FILE
+    fi
+fi
+unset FILE result result_cout
+echo -e "完成\n"
+
+echo "2.2.1文件与目录缺省权限控制..."
+result=`awk '{print $1":"$2}' /etc/profile|grep -v "^[[:space:]]*#"|grep -i umask|tail -n1`
+if [ $result!="umask:027" ];then
+    cp /etc/profile /etc/profile.bak
+    sed -i '$a\umask 027' /etc/profile
+fi
+echo -e "完成\n"
+
+echo "2.2.2账号文件权限设置..."
+
+ls -alL /etc/passwd /etc/shadow /etc/group
+echo "passwd_total="`ls -alL /etc/passwd 2>/dev/null|grep -v  "[r-][w-]-[r-]--[r-]--"|grep "[r-][w-][x-][r-][w-][x-][r-][w-][x-]"|wc -l`
+echo "shadow_total="`ls -alL /etc/shadow 2>/dev/null|grep -v  "[r-]--------"|grep "[r-][w-][x-][r-][w-][x-][r-][w-][x-]"|wc -l`
+echo "group_total="`ls -alL /etc/group 2>/dev/null|grep -v  "[r-][w-]-[r-]--[r-]--"|grep "[r-][w-][x-][r-][w-][x-][r-][w-][x-]"|wc -l`
+
+cp -p /etc/passwd /etc/passwd_bak
+cp -p /etc/shadow /etc/shadow_bak
+cp -p /etc/group /etc/group_bak
+
+chmod 644 /etc/passwd
+chmod 600 /etc/shadow
+chmod 644 /etc/group
+
+echo -e "完成\n"
+sleep 5
+
+echo "2.2.3修改SSH的Banner警告信息..."
+touch /etc/ssh_banner
+chown bin:bin /etc/ssh_banner
+chmod 644 /etc/ssh_banner
+echo " Authorized only. All activity will be monitored and reported " > /etc/ssh_banner
+
+ssh_banner=`cat /etc/ssh/sshd_config | grep -v '^[[:space:]]*#' | grep -i Banner|awk '{print $2}'`;
+ssh_status=`netstat -antp|grep -i listen|grep ":22\>"|wc -l`;
+if ([ "$ssh_status" != 0 ] && [ -s "$ssh_banner" ]);then
+    echo "sshd is running.sshd banner is not null.sshd banner check result:true";   
+else
+    if [ "$ssh_status" != 0 ];then
+        echo "sshd is running.sshd banner is null.sshd banner check result:false";
+        sed -i 's/#Banner/Banner/g' /etc/ssh/sshd_config
+        sed -i 's/Banner\s*.*/Banner \/etc\/ssh_banner/g' /etc/ssh/sshd_config
+    else
+        echo "sshd is not running.sshd banner check result:true";
+    fi
+fi
+unset ssh_banner ssh_status;
+systemctl restart sshd.service
+echo -e "完成\n"
+
+
+# echo "2.3.1启用远程日志功能..."
+
+# if [ -f /etc/rsyslog.conf ];then
+#     result_count=`cat /etc/rsyslog.conf | grep -v "^[[:space:]]*#" | grep -E '[[:space:]]*.+@.+' |wc -l`
+#     result=`cat /etc/rsyslog.conf | grep -v "^[[:space:]]*#" | grep -E '[[:space:]]*.+@.+'`
+#     if [ $result_count -eq 0 ];then
+#         sed -i '$a\*.*  @192.168.120.30' /etc/rsyslog.conf
+#     else
+#         sed -i "s/$result/*.*  @192.168.120.30/g" /etc/rsyslog.conf
+#     fi
+# else
+#     echo '*.*  @192.168.120.30' > /etc/rsyslog.conf
+# fi
+# unset result_count result
+
+# echo -e "完成\n"
+
+
+echo "2.3.2记录安全事件日志..."
+if [ -f /etc/rsyslog.conf ];then
+    result_count=`cat /etc/rsyslog.conf | grep -v "^[[:space:]]*#" | grep "*.err\;kern\.debug\;daemon\.notice[[:space:]]*/var/adm/messages"|wc -l`;
+    result=`cat /etc/rsyslog.conf | grep -v "^[[:space:]]*#" | grep "*.err\;kern\.debug\;daemon\.notice[[:space:]]*/var/adm/messages"`;
+    
+    if [ $result_count -eq 0 ];then
+        sed -i '$a\*.err;kern.debug;daemon.notice /var/adm/messages' /etc/rsyslog.conf
+    fi
+else
+    echo '*.err;kern.debug;daemon.notice /var/adm/messages' > /etc/rsyslog.conf
+fi
+unset result_count result
+if [ ! -f /var/adm/messages ];then
+    touch /var/adm/messages
+fi
+unset result_count result
+echo -e "完成\n"
+
+echo "2.3.3记录帐户登录日志..."
+if [ -s /etc/rsyslog.conf ];then
+    result_count=`cat /etc/rsyslog.conf | grep -v "^[[:space:]]*#" | egrep "authpriv\.\*.*[[:space:]]*\/var\/log\/authlog|authpriv\.info.*[[:space:]]*\/var\/log\/authlog" |wc -l`
+    result=`cat /etc/rsyslog.conf | grep -v "^[[:space:]]*#" | egrep "authpriv\.\*.*[[:space:]]*\/var\/log\/authlog|authpriv\.info.*[[:space:]]*\/var\/log\/authlog"`
+    if [ $result_count -eq 0 ]; then
+        sed -i '$a\authpriv.*  /var/log/authlog' /etc/rsyslog.conf
+    fi
+else
+    echo 'authpriv.*  /var/log/authlog' > /etc/rsyslog.conf
+fi
+if [ ! -f /var/log/authlog ];then
+    touch /var/log/authlog
+fi
+unset result_count result
+echo -e "完成\n"
+
+echo "2.3.4日志文件安全..."
+
+syslogd_status=`ps -ef |grep ' syslogd '|grep -v "grep"|wc -l`;
+rsyslogd_status=`ps -ef | grep "rsyslogd" | grep -v "grep" |wc -l`;
+if [ "$rsyslogd_status" != 0 ];then
+    LOGDIR=`cat /etc/rsyslog.conf | grep -v "^[[:space:]]*#"|awk '{print $2}'|sed 's/^-//g'|grep '^\s*\/'`
+    result_rsyslogd=`ls -l $LOGDIR 2>/dev/null|grep -v "[r-][w-]-[r-]-----"|awk '{print $9}'`
+    for rsyslog in $result_rsyslogd;do
+        chmod 640 $rsyslog
+    done
+fi
+unset rsyslogd_status LOGDIR result_rsyslogd
+
+echo -e "完成\n"
+
+
+echo "2.3.5配置su命令使用情况记录..."
+if [ -s /etc/rsyslog.conf ];then 
+    result_count=`cat /etc/rsyslog.conf | grep -v "^[[:space:]]*#" | grep "authpriv\.\*[[:space:]]*\/var/log/secure" |wc -l`
+    if [ $result_count -eq 0 ]; then
+        sed -i '$a\authpriv.*  /var/log/secure' /etc/rsyslog.conf
+    fi
+fi
+unset result_count
+echo -e "完成\n"
+
+echo "2.3.6记录cron行为日志..."
+if [ -s /etc/rsyslog.conf ];then 
+    result_count=`cat /etc/rsyslog.conf | grep -v "^[[:space:]]*#" | grep "cron.\*[[:space:]]*\/var/log/cron" |wc -l`
+    if [ $result_count -eq 0 ]; then
+        sed -i '$a\cron.* /var/log/cron' /etc/rsyslog.conf
+    fi
+fi
+unset result_count
+echo -e "完成\n"
+
+# echo "2.4.1限制root用户SSH远程登录..."
+# FILE=/etc/ssh/sshd_config
+# result_no_count=`grep -v "^[[:space:]]*#" $FILE|grep -i "PermitRootLogin no" |wc -l`
+# result_yes_count=`grep -v "^[[:space:]]*#" $FILE|grep -i "PermitRootLogin yes" |wc -l`
+# if [ $result_no_count -eq 0 ];then
+#     if [ $result_yes_count -eq 0 ];then
+#         sed -i '$a\PermitRootLogin no' $FILE
+#     else
+#         sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' $FILE
+#     fi
+# fi
+# unset result_no_count result_yes_count
+
+# result_count=`grep  -v "^[[:space:]]*#" $FILE|egrep "^protocol[[:space:]]*2|^Protocol[[:space:]]*2" |wc -l`
+# if [ $result_count -eq 0 ];then 
+#     sed -i '$a\Protocol 2' $FILE
+# fi
+# unset result_count
+# echo -e "完成\n"
+
+echo "2.4.2使用SSH协议进行远程维护..."
+result_sshd=`systemctl list-unit-files |egrep "sshd.service" |wc -l`
+if [ $result_sshd -gt 0 ];then    
+    systemctl restart sshd.service
+    systemctl enabled sshd.service
+fi
+result_telnet=`systemctl list-unit-files |egrep "telnet.socket" |wc -l`
+if [ $result_telnet -gt 0 ];then
+    systemctl stop telnet.socket
+    systemctl disable telnet.socket
+fi
+unset result_sshd result_telnet
+echo -e "完成"
+
+echo "2.5.1登陆超时时间设置..."
+FILE=/etc/profile
+result_count=`cat /etc/profile |grep -v "^[[:space:]]*#"|grep -v "^$"|grep "TMOUT" |wc -l`
+sed -i '$a\export TMOUT=300' $FILE
+source $FILE
+unset result_count FILE
+echo -e "完成"
+
+
+echo "2.5.2禁止UID为0的用户存在多个..."
+cp -pf /etc/passwd /etc/passwd_bak
+cp -pf /etc/shadow /etc/shadow_bak
+cp -p /etc/group /etc/group_bak
+result_count=`awk -F: '($3 == 0) { print $1 }' /etc/passwd | grep -v "^[[:space:]]*#" |grep -v root|wc -l`
+result=`awk -F: '($3 == 0) { print $1 }' /etc/passwd | grep -v "^[[:space:]]*#" |grep -v root`
+if [ $result_count -ne 0 ];then
+    for user in $result;do
+        userdel $user
+    done
+fi
+echo -e "完成"
+
+echo "2.5.2禁止UID为0的用户存在多个..."
+result_count=`echo $PATH|egrep "^\.\:|^\.\.\:|\:\.$|\:\.\.$|\:\.\:|\:\.\.\:"|wc -l`
+echo -e "完成"
+
+
+# echo "2.5.4修改SSH的Banner信息..."
+# systemctl sshd.service restart
+# echo " Authorized users only. All activity may be monitored and reported " > /etc/motd
+# echo -e "完成"
+
+
+echo "2.5.5禁止IP路由转发..."
+cp -p /etc/sysctl.conf /etc/sysctl.conf_bak
+sed -i '$a\net.ipv4.ip_forward=0' /etc/sysctl.conf
+sysctl -p 
+echo -e "完成"
+
+echo "2.5.6禁止组合键关机..."
+result_count=`cat /etc/inittab|grep -v "^#"|grep "ctrlaltdel" |wc -l`
+if [ $result_count -ne 0 ];then
+    sed -i 's#ca::ctrlaltdel:/sbin/shutdown -r -t 4 now##g' /etc/inittab
+fi
+echo -e "完成"
+
+
+echo "2.5.7禁止ICMP重定向..."
+cp -p /etc/sysctl.conf /etc/sysctl.conf_bak
+sed -i '$a\net.ipv4.conf.all.accept_redirects=0' /etc/sysctl.conf
+sysctl -p 
+echo -e "完成"
+
+# echo "2.5.8设置屏幕锁定..."
+# gconftool-2 --direct  --config-source xml:readwrite:/etc/gconf/gconf.xml.mandatory  --type bool  --set /apps/gnome-screensaver/idle_activation_enabled true
+# gconftool-2 --direct --config-source xml:readwrite:/etc/gconf/gconf.xml.mandatory  --type bool  --set /apps/gnome-screensaver/lock_enabled true
+# gconftool-2 --direct --config-source xml:readwrite:/etc/gconf/gconf.xml.mandatory  --type string   --set /apps/gnome-screensaver/mode blank-only
+# gconftool-2 --direct  --config-source xml:readwrite:/etc/gconf/gconf.xml.mandatory   --type int   --set /apps/gnome-screensaver/idle_delay 15
+# echo -e "完成"
+
+
+
+echo "2.5.9关闭不必要启动项..."
+result=`ls /etc/rc2.d/* /etc/rc3.d/* /etc/rc4.d/* /etc/rc5.d/* 2>/dev/null|egrep "lp|rpc|snmpdx|keyserv|nscd|Volmgt|uucp|dmi|sendmail|autoinstall"|grep "^S"|wc -l`
+
+echo -e "完成"
+
+sed -i '1i auth\t\trequired\tpam_wheel.so use_uid' /etc/pam.d/su
+sed -i '1i auth\t\tsufficient\tpam_rootok.so' /etc/pam.d/su
+
+
+echo "2.5.14禁止IP源路由..."
+for f in /proc/sys/net/ipv4/conf/*/accept_source_route;do
+    echo 0 > $f
+done
+echo -e "完成"
+
+
+echo "2.5.15更改主机解析地址的顺序..."
+echo -e 'order hosts,bind' > /etc/host.conf
+echo -e 'multi on' >> /etc/host.conf
+echo -e 'nospoof on' >> /etc/host.conf
+echo -e "完成\n"
+
+
+echo "2.5.16历史命令设置..."
+result1_count=`cat /etc/profile|grep -v "^[[:space:]]*#"|grep "HISTFILESIZE=[0-9]*" |wc -l`
+result2_count=`cat /etc/profile|grep -v "^[[:space:]]*#"|grep "HISTSIZE=[0-9]*" |wc -l`
+result1=`cat /etc/profile|grep -v "^[[:space:]]*#"|grep "HISTFILESIZE=[0-9]*"`
+result2=`cat /etc/profile|grep -v "^[[:space:]]*#"|grep "HISTSIZE=[0-9]*"`
+if [ $result1_count -eq 0 ];then
+    sed -i '$a\HISTFILESIZE=5' /etc/profile
+else
+    sed -i "s/$result1/HISTFILESIZE=5/g" /etc/profile
+fi
+
+if [ $result2_count -eq 0 ];then
+    sed -i '$a\HISTSIZE=5' /etc/profile
+else
+    sed -i "s/$result2/HISTSIZE=5/g" /etc/profile
+fi
+source /etc/profile
+echo -e "完成\n"

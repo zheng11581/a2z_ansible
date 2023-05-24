@@ -1,0 +1,17 @@
+# 
+---
+- name: OS Security
+  block: 
+  - name: Copy script to remote
+    ansible.builtin.template: 
+      src: security_safe.sh.j2
+      dest: /tmp/security_safe.sh
+      mode: u=rwx,g=rx,o=rx
+  - name: Execute script on remote
+    ansible.builtin.shell: 
+      cmd: bash /tmp/security_safe.sh
+    register: result
+  - name: Show result
+    ansible.builtin.debug: 
+      msg: "{{ result.stdout_lines }}"
+  when: ansible_os_family == 'Redhat' or  ansible_os_family == "Anolis" or ansible_os_family == "CentOS"

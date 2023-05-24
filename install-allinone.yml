@@ -1,12 +1,21 @@
 ---
-- name: Configure LVM for all hosts
-  hosts: "{{ hostgroup | default('base') }}"
+# - name: Configure LVM for all hosts
+#   hosts: "{{ hostgroup | default('base') }}"
+#   become: true
+#   any_errors_fatal: true
+#   remote_user: root
+#   become_user: root
+#   roles:
+#   - lvm_manage
+
+- name: OS security
+  hosts: "{{ hostgroup | default('security') }}"
   become: true
   any_errors_fatal: true
   remote_user: root
   become_user: root
   roles:
-  - lvm_manage
+  - security
 
 # - name: Install MySQL Single Instance
 #   hosts: "{{ hostgroup | default('mysql') }}"
