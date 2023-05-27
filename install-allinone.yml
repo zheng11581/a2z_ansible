@@ -1,12 +1,12 @@
 ---
-# - name: Configure LVM for all hosts
-#   hosts: "{{ hostgroup | default('base') }}"
-#   become: true
-#   any_errors_fatal: true
-#   remote_user: root
-#   become_user: root
-#   roles:
-#   - lvm_manage
+- name: Configure LVM for all hosts
+  hosts: "{{ hostgroup | default('base') }}"
+  become: true
+  any_errors_fatal: true
+  remote_user: root
+  become_user: root
+  roles:
+  - lvm_manage
 
 - name: OS security
   hosts: "{{ hostgroup | default('security') }}"
@@ -17,25 +17,25 @@
   roles:
   - security
 
-# - name: Install MySQL Single Instance
-#   hosts: "{{ hostgroup | default('mysql') }}"
-#   become: true
-#   any_errors_fatal: true
-#   remote_user: root
-#   become_user: root
-#   roles:
-#   - mysql_install
+- name: Install MySQL Single Instance
+  hosts: "{{ hostgroup | default('mysql') }}"
+  become: true
+  any_errors_fatal: true
+  remote_user: root
+  become_user: root
+  roles:
+  - mysql_install
 
-# - name: Install Application - nginx redis nacos
-#   hosts: "{{ hostgroup | default('middleware') }}"
-#   become: true
-#   any_errors_fatal: true
-#   remote_user: root
-#   become_user: root
-#   roles:
-#   - nginx_install
-#   - redis_install
-#   - nacos_install
+- name: Install Application - nginx redis nacos
+  hosts: "{{ hostgroup | default('middleware') }}"
+  become: true
+  any_errors_fatal: true
+  remote_user: root
+  become_user: root
+  roles:
+  - nginx_install
+  - redis_install
+  - nacos_install
 
 # - name: Install Application - application
 #   hosts: "{{ hostgroup | default('backend') }}"
