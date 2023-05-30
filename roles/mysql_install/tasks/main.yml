@@ -23,3 +23,6 @@
 - name: import database
   ansible.builtin.include_tasks: import_data_struct.yml
   when: import_data_struct == 1
+
+- name: config replication
+  ansible.builtin.import_tasks: config_master_slaves.yml
