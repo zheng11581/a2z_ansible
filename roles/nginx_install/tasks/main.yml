@@ -31,15 +31,15 @@
     group: root
     mode: u=rwx,g=r,o=r
 
-# - name: Install Nginx - Copy api.conf
-#   ansible.builtin.template:
-#     src: api.conf.j2
-#     dest: "{{nginx_home}}/conf.d/api.conf"
-#     owner: root
-#     group: root
-#     mode: u=rwx,g=r,o=r
+- name: Install Nginx - Copy api.conf
+  ansible.builtin.template:
+    src: api.conf.j2
+    dest: "{{nginx_home}}/conf.d/api.conf"
+    owner: root
+    group: root
+    mode: u=rwx,g=r,o=r
 
-- name: Install Nginx - Start and Enable Nginx and Just force systemd to reread configs
+- name: Install Nginx - Start and Enable Nginx and Just force systemd to reload configs
   ansible.builtin.systemd:
     name: nginx
     state: started

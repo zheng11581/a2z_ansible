@@ -1,7 +1,9 @@
 #!/bin/bash
 mkdir {{nginx_www}}
 cd /root
-tar -xvf {{nginx_package}}.tar.gz && \
-  cd {{nginx_package}}
+tar -xvf {{nginx_package}}.tar.gz && cd {{nginx_package}}
 ./configure --prefix={{nginx_home}} {{nginx_modules}}
 make && make install
+if [ ! -e {{nginx_home}}/conf.d/ ];then
+  mkdir {{nginx_home}}/conf.d/
+fi

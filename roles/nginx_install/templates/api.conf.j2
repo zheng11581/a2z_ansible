@@ -1,56 +1,55 @@
 server{
     listen 80; 
-    #listen 443 ssl;
+    listen 443 ssl;
     server_name {{domain_name}};
-	client_max_body_size 10M;
+    client_max_body_size 10M;
 
     root {{nginx_home}}/html;
     index index.html index.htm index.jsp;
 
-	#ssl on;
-	#ssl_certificate   ../conf.d/cert/6919700_follow-up-test.bjbryy.cn.pem;
-	#ssl_certificate_key  ../conf.d/cert/6919700_follow-up-test.bjbryy.cn.key;
-    #ssl_session_timeout 5m;
-	#ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
-    #ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-	#ssl_prefer_server_ciphers on;
+    ssl_certificate   ../conf.d/cert/{{ ssl_cert }};
+    ssl_certificate_key  ../conf.d/cert/{{ ssl_key }};
+    ssl_session_timeout 5m;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_prefer_server_ciphers on;
         
-	error_page   503  /503.html;
+    error_page   503  /503.html;
         location = /503.html {
             default_type text/html;
             return 503 'no';
         }
 
-	error_page 413 /respon_413.json;
-	location = /respon_413.json {
-	    default_type application/json;
-	    return 413 '{"success":false,"message":"文件大小超过10MB,无法上传","code":"E20001","data":null}';
-	}
+    error_page 413 /respon_413.json;
+    location = /respon_413.json {
+        default_type application/json;
+        return 413 '{"success":false,"message":"文件大小超过10MB,无法上传","code":"E20001","data":null}';
+    }
 
-	error_page  404 403 500 502 504  /404.html;
-	
-	location = /404.html {
-	    root {{nginx_home}}/html;
-	}
+    error_page  404 403 500 502 504  /404.html;
+    
+    location = /404.html {
+        root {{nginx_home}}/html;
+    }
 
-	location /jump.html {
-		rewrite {{nginx_home}}/jump.html last;
-	}
+    location /jump.html {
+        rewrite {{nginx_home}}/jump.html last;
+    }
 
-	location /jumpUrl.html {
+    location /jumpUrl.html {
         rewrite {{nginx_home}}/html/jumpUrl.html last;
     }
 
-	location = /doctor/Jv39Bb6yHE.txt {
-	    root {{nginx_home}}/html;
+    location = /doctor/Jv39Bb6yHE.txt {
+        root {{nginx_home}}/html;
     }
 
-	location = /user/Jv39Bb6yHE.txt {
+    location = /user/Jv39Bb6yHE.txt {
         root {{nginx_home}}/html;
     }
 
 
-	location / {
+    location / {
         proxy_pass http://localhost:8888;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -62,7 +61,7 @@ server{
         proxy_connect_timeout 120s;
     }
 
-	location /JobAdmin {
+    location /JobAdmin {
         proxy_pass http://localhost:8190;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -74,7 +73,7 @@ server{
         proxy_connect_timeout 120s;
     }
 
-	location /websocket {
+    location /websocket {
         proxy_pass http://localhost:8184/chat/websocket;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -110,7 +109,7 @@ server{
         proxy_connect_timeout 120s;
     }
 
-	location /websocket5 {
+    location /websocket5 {
         proxy_pass http://localhost:8184/chat/websocket5;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -122,7 +121,7 @@ server{
         proxy_connect_timeout 120s;
     }
 
-	location /eurekaServer {
+    location /eurekaServer {
         proxy_pass http://localhost:8187;
 
         proxy_set_header Host $host;
@@ -132,48 +131,48 @@ server{
         proxy_set_header X-Forwarded-Port $server_port;
         proxy_redirect off;
     }
-	
-	location /followup {
+    
+    location /followup {
         try_files $uri $uri/ /followup/index.html;
     }
 
-	location ~* \.(gif|jpg|jpeg|ico|txt|png|webp|svg)$ {
-	    expires 30d;
+    location ~* \.(gif|jpg|jpeg|ico|txt|png|webp|svg)$ {
+        expires 30d;
         root /glzt/PatientService/images;
-		add_header    Cache-Control  max-age=86400;
+        add_header    Cache-Control  max-age=86400;
         add_header Access-Control-Allow-Origin *;
-    	add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
-    	add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,lang,ac
+        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+        add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,lang,ac
 cess-token';
     }
 
-	location ~* \.(mp3)$ {
+    location ~* \.(mp3)$ {
         expires 30d;
-        root /home/PatientService/audio;
+        root /glzt/PatientService/audio;
         add_header    Cache-Control  max-age=86400;
     }
-	
-	#电子发票文件
-	location /file/invoice {
-		expires 30d;
-        root /home/PatientService/images;
-		add_header    Cache-Control  max-age=86400;
-      	add_header Access-Control-Allow-Origin *;
-    	add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
-    	add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,lang,access-token';
-    }
-	
-	#疾病摘要文件
-	location /file/mdt {
+    
+    #电子发票文件
+    location /file/invoice {
         expires 30d;
-        root /home/PatientService/images;
+        root /glzt/PatientService/images;
+        add_header    Cache-Control  max-age=86400;
+          add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+        add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,lang,access-token';
+    }
+    
+    #疾病摘要文件
+    location /file/mdt {
+        expires 30d;
+        root /glzt/PatientService/images;
         add_header    Cache-Control  max-age=86400;         
         add_header Access-Control-Allow-Origin *;
         add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
         add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,lang,access-token';
     }
 
-	location /patient {
+    location /patient {
         proxy_pass {{api_proxy}};
 
         proxy_set_header Host $host;
@@ -185,19 +184,19 @@ cess-token';
         proxy_redirect http:// $scheme://;
     }
 
-	#音视频录制文件代理
-	location /recordfile {
-		proxy_pass {{api_proxy}};
-		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-		proxy_set_header X-Forwarded-Proto $scheme;
-		proxy_set_header X-Forwarded-Port $server_port;
-		add_header Access-Control-Allow-Origin *;
-		add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept";
-		add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
-	}
+    #音视频录制文件代理
+    location /recordfile {
+        proxy_pass {{api_proxy}};
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept";
+        add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
+    }
 
-	#埋点系统
-	location /dataGather {
+    #埋点系统
+    location /dataGather {
         proxy_pass {{api_proxy}};
 
         proxy_set_header Host $host;
@@ -224,14 +223,14 @@ cess-token';
 
     #运营后台
     location /community {
-        alias /opt/nginx/html/community;
+        alias /glzt/nginx/html/community;
         index index.html;
         try_files $uri $uri/ @routerback;
     }
 
     #WEB端
     location /web {
-        alias /opt/nginx/html/web;
+        alias /glzt/nginx/html/web;
         index index.html;
         #try_files $uri $uri/ @routerback;
         try_files $uri $uri/ /web/index.html;
@@ -254,7 +253,7 @@ cess-token';
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Port $server_port;
-	    proxy_redirect http:// $scheme://;
+        proxy_redirect http:// $scheme://;
     }  
 
     location /platform/ {
@@ -269,7 +268,7 @@ cess-token';
 
     #admin监控
     location /springbootadmin {
-        proxy_pass http://127.0.0.1:8199/springbootadmin;
+        proxy_pass http://127.0.0.1:8199;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP   $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -278,7 +277,7 @@ cess-token';
         proxy_redirect off; 
     }
 
-	# Nacos
+    # Nacos
     location /nacos {
         proxy_pass http://127.0.0.1:8848;
         proxy_set_header Host $host;
@@ -290,9 +289,7 @@ cess-token';
     }
 
     location ~* .(gif|jpg|jpeg|ico|txt|png)$ {
-        #alias /community/images/;
-        #root /home/CommunityService/files/;
-        root /home/PatientService/images;
+        root /glzt/PatientService/images;
         add_header Cache-Control max-age=86400;
         add_header Access-Control-Allow-Origin *;
         add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
@@ -300,9 +297,9 @@ cess-token';
     }
 
     location ~* \.(xls|xlsx)$ {
-		expires 30d;
-		root /home/PatientService/excel;
-		add_header    Cache-Control  max-age=86400;
+        expires 30d;
+        root /glzt/PatientService/excel;
+        add_header    Cache-Control  max-age=86400;
     }
 
 
