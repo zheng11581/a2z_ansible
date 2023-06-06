@@ -39,6 +39,7 @@ common_packages_el8:
 nginx_home: /glzt/nginx
 nginx_modules: "--with-http_ssl_module --with-http_stub_status_module"
 nginx_www: "{{ nginx_home }}/html"
+nginx_site_conf: "gih.conf"
 
 # nginx 配置文件相关
 # C端

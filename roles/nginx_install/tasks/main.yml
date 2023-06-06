@@ -33,8 +33,8 @@
 
 - name: Install Nginx - Copy api.conf
   ansible.builtin.template:
-    src: api.conf.j2
-    dest: "{{nginx_home}}/conf.d/api.conf"
+    src: "{{ nginx_site_conf }}.j2"
+    dest: "{{nginx_home}}/conf.d/{{ nginx_site_conf }}"
     owner: root
     group: root
     mode: u=rwx,g=r,o=r
