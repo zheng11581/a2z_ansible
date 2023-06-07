@@ -6,14 +6,14 @@
     group: "{{ springboot_group }}"
   loop: "{{ springboot_applications }}"
 
-- name: "Springboot - Copy jar application"
-  copy:
-    src: "{{ item.src_file }}"
-    dest: "{{ item.deploy_folder }}/{{ item.app_bin }}"
-    owner: "{{ springboot_user }}"
-    group: "{{ springboot_group }}"
-    mode: "u+x"
-  loop: "{{ springboot_applications }}"
+# - name: "Springboot - Copy jar application"
+#   copy:
+#     src: "{{ item.src_file }}"
+#     dest: "{{ item.deploy_folder }}/{{ item.app_bin }}"
+#     owner: "{{ springboot_user }}"
+#     group: "{{ springboot_group }}"
+#     mode: "u+x"
+#   loop: "{{ springboot_applications }}"
   # notify:
   #   - "Restart application"
 

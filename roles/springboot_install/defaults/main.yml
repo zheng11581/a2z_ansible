@@ -161,3 +161,157 @@ springboot_applications: # 有多少个服务加多少 application
   startup: 'startup.sh'
   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
 
+# # Backends
+# springboot_applications: # 有多少个服务加多少 application
+# - app_short_name: 'Appoint'
+#   app_long_name: 'Appoint'
+#   deploy_folder: '/glzt/his_new/appoint'
+#   app_bin: 'appoint-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/appoint-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+# - app_short_name: 'MedInsurance'
+#   app_long_name: 'MedInsurance'
+#   deploy_folder: '/glzt/his_new/finance/medinsurance'
+#   app_bin: 'medinsurance-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/medinsurance-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+# - app_short_name: 'HispRes'
+#   app_long_name: 'HispRes'
+#   deploy_folder: '/glzt/his_new/hisp_resource'
+#   app_bin: 'hispresource-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/hispresource-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+# - app_short_name: 'FileManage'
+#   app_long_name: 'FileManage'
+#   deploy_folder: '/glzt/his_new/file_manage'
+#   app_bin: 'filemanage-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/filemanage-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+# - app_short_name: 'Schedule'
+#   app_long_name: 'Schedule'
+#   deploy_folder: '/glzt/his_new/schedule'
+#   app_bin: 'schedule-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/schedule-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+# - app_short_name: 'SocketServer'
+#   app_long_name: 'SocketServer'
+#   deploy_folder: '/glzt/his_new/socketserver'
+#   app_bin: 'socketserver-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/socketserver-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+# - app_short_name: 'PrintManage'
+#   app_long_name: 'PrintManage'
+#   deploy_folder: '/glzt/his_new/print_manage'
+#   app_bin: 'printManage-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/printManage-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+# - app_short_name: 'Task'
+#   app_long_name: 'Task'
+#   deploy_folder: '/glzt/his_new/task'
+#   app_bin: 'task-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/task-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+# - app_short_name: 'zuul-gateway'
+#   app_long_name: 'zuul-gateway'
+#   deploy_folder: '/glzt/his_new/gate_way'
+#   app_bin: 'Gateway-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/Gateway-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+# - app_short_name: 'OrgManage'
+#   app_long_name: 'OrgManage'
+#   deploy_folder: '/glzt/his_new/org_manager'
+#   app_bin: 'orgmanage-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/orgmanage-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+
+# - app_short_name: 'TemplateEngine'
+#   app_long_name: 'TemplateEngine'
+#   deploy_folder: '/glzt/his_new/template_engine'
+#   app_bin: 'templateEngine-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/templateEngine-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+
+# - app_short_name: 'Register'
+#   app_long_name: 'Register'
+#   deploy_folder: '/glzt/his_new/register'
+#   app_bin: 'register-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/register-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+
+# - app_short_name: 'BaseService'
+#   app_long_name: 'BaseService'
+#   deploy_folder: '/glzt/his_new/baseservice'
+#   app_bin: 'basespringboot-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/basespringboot-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+
+# - app_short_name: 'DictManage'
+#   app_long_name: 'DictManage'
+#   deploy_folder: '/glzt/his_new/dict_manage'
+#   app_bin: 'dictmanage-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/dictmanage-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+
+# - app_short_name: 'UserManage'
+#   app_long_name: 'UserManage'
+#   deploy_folder: '/glzt/his_new/user_manager'
+#   app_bin: 'usermanage-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/usermanage-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+
+# - app_short_name: 'OutpatientDoctor'
+#   app_long_name: 'OutpatientDoctor'
+#   deploy_folder: '/glzt/his_new/outp_doctor'
+#   app_bin: 'outpdoctor-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/outpdoctor-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+
+# - app_short_name: 'HisAdapter'
+#   app_long_name: 'HisAdapter'
+#   deploy_folder: '/glzt/his_new/hisadapter'
+#   app_bin: 'hisadapter-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/hisadapter-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
+
+# - app_short_name: 'emrservice'
+#   app_long_name: 'emrservice'
+#   deploy_folder: '/glzt/his_new/emrservice'
+#   app_bin: 'emrspringboot-1.0.0.jar' 
+#   src_file: '/root/softwares/application/B/emrspringboot-1.0.0.jar'
+#   configuration_template: false
+#   startup: 'startup.sh'
+#   jvm_opt: "-XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -Xms256m -Xmx256m" # 指定 JVM 参数
