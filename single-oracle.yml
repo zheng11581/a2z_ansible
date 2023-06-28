@@ -1,7 +1,0 @@
----
-- name: Import_playbook config-oracle-os
-  import_playbook: config-oracle-os.yml
-- name: Import_playbook swdb-oracle
-  import_playbook: swdb-oracle.yml
-- name: Import_playbook manage-oracle-db
-  import_playbook: manage-oracle-db.yml

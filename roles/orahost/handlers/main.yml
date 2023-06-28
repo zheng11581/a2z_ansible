@@ -1,9 +1,0 @@
----
-- name: restart network
-  ansible.builtin.service: name=network state=restarted
-
-- name: restart server
-  ansible.builtin.command: reboot
-
-- name: swapon
-  ansible.builtin.command: swapon -a
