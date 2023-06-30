@@ -31,6 +31,14 @@
     group: root
     mode: u=rwx,g=r,o=r
 
+- name: Install Nginx - Copy nginx.conf
+  ansible.builtin.template:
+    src: "{{ nginx_default_conf }}.j2"
+    dest: "{{nginx_home}}/conf/{{ nginx_default_conf }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=r,o=r
+
 - name: Install Nginx - Copy api.conf
   ansible.builtin.template:
     src: "{{ nginx_site_conf }}.j2"
