@@ -1,12 +1,12 @@
 ---
-vg_name: glzt
+vg_name: yonbip
 pvs_list: /dev/sdb # If, for example, we already have VG vg.services on top of /dev/sdb, this VG will be extended by /dev/sdc.
 lv_name: data
 mount_point: 
   src: /dev/{{ vg_name }}/{{ lv_name }}
-  path: /glzt/
+  path: /data/
   fstype: xfs
 configure_local_repo: 
-  enabled: true
+  enabled: false
   packages_dir: /root/softwares/iso/
   os_iso: AnolisOS-8.6-x86_64-dvd.iso

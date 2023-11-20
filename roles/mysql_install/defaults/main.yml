@@ -46,11 +46,12 @@ mtls_with_mysql_group_replication: 0
 #### mysql 安装相关的配置
 ####
 #mysql 安装包所在的目录
-mysql_packages_dir: /root/softwares/mysql/
+mysql_packages_dir: /home/zhenghc/softwares/
 #mysql 安装包的名字
 #mysql_package: mysql-5.6.44-linux-glibc2.12-x86_64.tar.gz
-mysql_package: mysql-5.7.39-linux-glibc2.12-x86_64.tar.gz
+#mysql_package: mysql-5.7.39-linux-glibc2.12-x86_64.tar.gz
 #mysql_package: mysql-8.0.30-linux-glibc2.17-x86_64-minimal.tar.xz
+mysql_package: mysql-8.0.34-linux-glibc2.17-x86_64.tar.gz
 #linux 系统级别mysql用户相关信息
 mysql_user: mysql
 mysql_group: mysql
@@ -60,7 +61,7 @@ import_data_struct: 0
 #mysql 安装目录
 mysql_base_dir: /usr/local/mysql/
 #mysql 真正的datadir就会是mysql_data_dir_base+mysql_port
-mysql_data_dir_base: /glzt/mysql/data
+mysql_data_dir_base: /data/mysql/data
 mysql_port: 3306
 mysql_root_password: ZZNLybxGloKGkBZhuK0L
 mysql_zabbix_password: mtls
