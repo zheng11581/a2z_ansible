@@ -1,0 +1,15 @@
+---
+- hosts: "{{ hostgroup | default('base') }}"
+  become: true
+  any_errors_fatal: true
+  remote_user: root
+  become_user: root
+  tasks:
+  - name: Download Config YAML
+    ansible.builtin.command: python /tmp/scripts/download.py config.yaml-202311201846452768 /tmp/scripts/config1.yaml
+# - hosts: "{{ hostgroup | default('base') }}"
+#   gather_facts: true
+#   tasks:
+#   - name: Lookup ansible_hostname in getent database
+#     command: getent hosts {{ ansible_hostname }}
+#     register: result
