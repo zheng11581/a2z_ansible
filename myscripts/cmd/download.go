@@ -15,12 +15,13 @@ var downloadCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var download download.Download
 		download.Url = "http://127.0.0.1:5000/ingress_monitor/conf/download"
+		env := cmd.Flags().Lookup("env").Value.String()
 		if env == "prod" {
-			download.Url = "https://ywb.yyuap.com/opsv/ywb-custom/ingress_monitor/conf/download"
+			download.Url = "https://<domain_name>/opsv/ywb-custom/ingress_monitor/conf/download"
 		}
 		download.Method = "GET"
-		download.FileName = fileName
-		download.SaveAs = saveas
+		download.FileName = cmd.Flags().Lookup("filename").Value.String()
+		download.SaveAs = cmd.Flags().Lookup("saveas").Value.String()
 		download.Download()
 		fmt.Printf("FileName: %s, SaveAs: %s, Env: %s\n", download.FileName, download.SaveAs, env)
 	},

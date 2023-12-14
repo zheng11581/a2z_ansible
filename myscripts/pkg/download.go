@@ -12,11 +12,11 @@ import (
 )
 
 type LoginReq struct {
-	baseReq
+	BaseReq
 	Body LoginBody
 }
 
-type baseReq struct {
+type BaseReq struct {
 	Url    string
 	Method string
 }
@@ -27,11 +27,11 @@ type LoginBody struct {
 }
 
 type LoginResp struct {
-	baseResp
+	BaseResp
 	Data LoginData
 }
 
-type baseResp struct {
+type BaseResp struct {
 	Code    string
 	Status  string
 	Message string
@@ -109,7 +109,7 @@ type Download struct {
 }
 
 type DownloadReq struct {
-	baseReq
+	BaseReq
 	FileName string
 	SaveAs   string
 	Body     DownloadBody
@@ -119,7 +119,7 @@ type DownloadBody struct {
 }
 
 type DownloadResp struct {
-	baseResp
+	BaseResp
 	Data DownloadData
 }
 
@@ -130,16 +130,14 @@ func (download *Download) Download() {
 	// Request Body
 	reqBody, err := json.Marshal(download.Body)
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		log.Fatalf("读取下载参数失败：%s", err.Error())
 	}
 	url := download.Url + "?file_name=" + download.FileName
 	method := download.Method
 	// 创建一个Request
 	request, err := http.NewRequest(method, url, bytes.NewReader(reqBody))
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		log.Fatalf("创建下载请求失败：%s", err.Error())
 	}
 	// 配置Request的Headers
 	request.Header.Set("Content-Type", "application/octet-stream")
@@ -148,13 +146,10 @@ func (download *Download) Download() {
 	client := http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		log.Fatalf("请求下载失败：%s", err.Error())
 	}
-	fmt.Print(response.StatusCode)
 	if (response.StatusCode == 403) || (response.StatusCode == 500) || (response.StatusCode == 404) {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		log.Fatalf("请求下载失败：%d", response.StatusCode)
 	}
 
 	// 读取Response Body
@@ -163,7 +158,7 @@ func (download *Download) Download() {
 	// 读取到的内容保存到文件
 	file, err := os.OpenFile(download.SaveAs, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("打开下载文件失败：%s", err.Error())
 	}
 	defer file.Close()
 	writer := bufio.NewWriter(file)
